@@ -13,8 +13,16 @@ class LoginForm extends StatefulWidget {
 }
 
 class _LoginFormState extends State<LoginForm> {
-  final _phone = TextEditingController(text: '01000000000');
-  final _password = TextEditingController(text: 'password');
+  final _phone = TextEditingController();
+  final _password = TextEditingController();
+  bool _obscurePassword = true;
+
+  @override
+  void dispose() {
+    _phone.dispose();
+    _password.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,14 +33,32 @@ class _LoginFormState extends State<LoginForm> {
         children: [
           TextField(
             controller: _phone,
-            decoration: const InputDecoration(labelText: 'رقم الهاتف'),
+            decoration: const InputDecoration(
+              labelText: 'رقم الهاتف',
+              hintText: '01000000000',
+              border: OutlineInputBorder(),
+            ),
             keyboardType: TextInputType.phone,
           ),
           const SizedBox(height: 12),
           TextField(
             controller: _password,
-            decoration: const InputDecoration(labelText: 'كلمة المرور'),
-            obscureText: true,
+            decoration: InputDecoration(
+              labelText: 'كلمة المرور',
+              hintText: 'أدخل كلمة المرور',
+              border: const OutlineInputBorder(),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _obscurePassword = !_obscurePassword;
+                  });
+                },
+              ),
+            ),
+            obscureText: _obscurePassword,
           ),
           const SizedBox(height: 24),
           if (state is AuthError)
