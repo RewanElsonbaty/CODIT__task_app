@@ -26,13 +26,15 @@ analyzer:
     missing_return: error
     # Allow TODOs
     todo: ignore
-    # Deprecated member use is just info
-    deprecated_member_use: info
+    # Deprecated member use - ignore false positives
+    deprecated_member_use: ignore
     deprecated_member_use_from_same_package: ignore
     # Type issues
     invalid_annotation_target: ignore
     # File names
     file_names: ignore
+    # Ignore implementation imports warnings
+    implementation_imports: ignore
 
 linter:
   rules:

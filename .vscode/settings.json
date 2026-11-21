@@ -1,22 +1,20 @@
-{
-  "dart.analysisServerFolding": false,
-  "dart.debugExternalPackageLibraries": false,
-  "dart.debugSdkLibraries": false,
-  "dart.previewFlutterUiGuides": true,
-  "dart.previewFlutterUiGuidesCustomTracking": true,
+﻿{
+  "dart.analysisExcludedFolders": [
+    "**/_deprecated/**",
+    "**/build/**",
+    "**/.dart_tool/**"
+  ],
   "dart.lineLength": 120,
-  "editor.rulers": [120],
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
-    "source.fixAll": "explicit"
+    "source.fixAll": true
   },
   "[dart]": {
-    "editor.formatOnSave": true,
-    "editor.formatOnType": true,
+    "editor.rulers": [120],
     "editor.selectionHighlight": false,
     "editor.suggest.snippetsPreventQuickSuggestions": false,
     "editor.suggestSelection": "first",
     "editor.tabCompletion": "onlySnippets",
-    "editor.wordBasedSuggestions": "off"
+    "editor.wordBasedSuggestions": false
   }
 }
