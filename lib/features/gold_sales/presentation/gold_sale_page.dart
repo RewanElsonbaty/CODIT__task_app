@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../core/di/injection.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/responsive_utils.dart';
 import '../domain/gold_models.dart';
@@ -13,7 +12,7 @@ class GoldSalePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => getIt<GoldSaleCubit>()..startNew(),
+      create: (_) => GoldSaleCubit()..startNew(),
       child: const _GoldSaleView(),
     );
   }
