@@ -31,6 +31,10 @@ class _OtpFormState extends State<OtpForm> {
   void initState() {
     super.initState();
     _startResendTimer();
+    // Auto-focus على أول خانة
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _focusNodes[0].requestFocus();
+    });
   }
 
   @override
@@ -62,16 +66,32 @@ class _OtpFormState extends State<OtpForm> {
   bool get _isComplete => _otp.length == 6;
 
   void _onChanged(int index, String value) {
-    if (value.length == 1 && index < 5) {
+    // لو User كتب رقم
+    if (value.isNotEmpty && index < 5) {
+      // انتقل للخانة اللي بعدها
       _focusNodes[index + 1].requestFocus();
     }
 
+    // لو اكتمل الـ 6 خانات
     if (_isComplete) {
-      // Auto-submit عند اكتمال الإدخال
+      // Auto-submit
+      FocusScope.of(context).unfocus();
       _submit();
     }
 
     setState(() {});
+  }
+
+  void _onKeyPressed(int index, RawKeyEvent event) {
+    // لو User ضغط Backspace والخانة فاضية
+    if (event is RawKeyDownEvent &&
+        event.logicalKey == LogicalKeyboardKey.backspace &&
+        _controllers[index].text.isEmpty &&
+        index > 0) {
+      // ارجع للخانة اللي قبلها
+      _focusNodes[index - 1].requestFocus();
+      _controllers[index - 1].clear();
+    }
   }
 
   void _submit() {
@@ -184,30 +204,48 @@ class _OtpFormState extends State<OtpForm> {
                   return SizedBox(
                     width: actualWidth,
                     height: isSmallScreen ? 50 : 55,
-                    child: TextField(
-                      controller: _controllers[index],
-                      focusNode: _focusNodes[index],
-                      textAlign: TextAlign.center,
-                      keyboardType: TextInputType.number,
-                      maxLength: 1,
-                      style: TextStyle(
-                        fontSize: isSmallScreen ? 20 : 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      decoration: InputDecoration(
-                        counterText: '',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
+                    child: RawKeyboardListener(
+                      focusNode: FocusNode(),
+                      onKey: (event) => _onKeyPressed(index, event),
+                      child: TextField(
+                        controller: _controllers[index],
+                        focusNode: _focusNodes[index],
+                        textAlign: TextAlign.center,
+                        keyboardType: TextInputType.number,
+                        maxLength: 1,
+                        style: TextStyle(
+                          fontSize: isSmallScreen ? 20 : 24,
+                          fontWeight: FontWeight.bold,
                         ),
-                        filled: true,
-                        fillColor: Colors.grey[100],
-                        contentPadding: EdgeInsets.zero,
+                        decoration: InputDecoration(
+                          counterText: '',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          filled: true,
+                          fillColor: Colors.grey[100],
+                          contentPadding: EdgeInsets.zero,
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: Colors.grey[300]!,
+                              width: 1.5,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: theme.primaryColor,
+                              width: 2,
+                            ),
+                          ),
+                        ),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                          LengthLimitingTextInputFormatter(1),
+                        ],
+                        onChanged: (value) => _onChanged(index, value),
                       ),
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      onChanged: (value) => _onChanged(index, value),
-                      onTap: () {
-                        _controllers[index].clear();
-                      },
                     ),
                   );
                 }),
