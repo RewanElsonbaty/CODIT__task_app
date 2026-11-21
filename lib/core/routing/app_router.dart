@@ -3,6 +3,7 @@ import 'package:codit/features/authentication/presentation/authentication_cubit.
 import 'package:codit/features/authentication/presentation/device_verify_page.dart';
 import 'package:codit/features/authentication/presentation/login_page.dart';
 import 'package:codit/features/authentication/presentation/otp_page.dart';
+import 'package:codit/features/authentication/presentation/splash_page.dart';
 import 'package:codit/features/gold_sales/presentation/gold_sale_page.dart';
 import 'package:codit/features/notifications/presentation/pages/notifications_page.dart';
 import 'package:codit/core/widgets/font_test_widget.dart';
@@ -10,12 +11,12 @@ import 'package:codit/mocks/scenario_panel_page.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-/// Simplified router - starts directly at login
+/// Simplified router with 1-second splash screen
 ///
-/// No splash screen - opens directly to login page
+/// Shows splash for 1 second, then navigates to login
 GoRouter buildRouter(AuthenticationCubit authCubit) {
   return GoRouter(
-    initialLocation: '/login',
+    initialLocation: '/',
     refreshListenable: _AuthRefresh(authCubit),
     redirect: (context, state) {
       final authState = authCubit.state;
@@ -25,7 +26,8 @@ GoRouter buildRouter(AuthenticationCubit authCubit) {
       final isAuthRoute =
           loc.startsWith('/login') ||
           loc.startsWith('/otp') ||
-          loc.startsWith('/device');
+          loc.startsWith('/device') ||
+          loc == '/';
 
       if (authState is AuthError && !isAuthRoute) return '/login';
 
@@ -37,11 +39,14 @@ GoRouter buildRouter(AuthenticationCubit authCubit) {
         return null;
       }
 
-      if (isAuthRoute) return '/home';
+      if (isAuthRoute && loc != '/') return '/home';
       return null;
     },
     routes: [
-      // Auth Routes - No splash, start directly at login
+      // Splash screen - shows for 1 second
+      GoRoute(path: '/', builder: (_, _) => const SplashPage()),
+      
+      // Auth Routes
       GoRoute(path: '/login', builder: (_, _) => const LoginPage()),
       GoRoute(path: '/otp', builder: (_, _) => const OtpPage()),
       GoRoute(path: '/device', builder: (_, _) => const DeviceVerifyPage()),
