@@ -33,7 +33,9 @@ class _OtpFormState extends State<OtpForm> {
     _startResendTimer();
     // Auto-focus على أول خانة
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _focusNodes[0].requestFocus();
+      if (mounted) {
+        _focusNodes[0].requestFocus();
+      }
     });
   }
 
@@ -64,35 +66,6 @@ class _OtpFormState extends State<OtpForm> {
   String get _otp => _controllers.map((c) => c.text).join();
 
   bool get _isComplete => _otp.length == 6;
-
-  void _onChanged(int index, String value) {
-    // لو User كتب رقم
-    if (value.isNotEmpty && index < 5) {
-      // انتقل للخانة اللي بعدها
-      _focusNodes[index + 1].requestFocus();
-    }
-
-    // لو اكتمل الـ 6 خانات
-    if (_isComplete) {
-      // Auto-submit
-      FocusScope.of(context).unfocus();
-      _submit();
-    }
-
-    setState(() {});
-  }
-
-  void _onKeyPressed(int index, RawKeyEvent event) {
-    // لو User ضغط Backspace والخانة فاضية
-    if (event is RawKeyDownEvent &&
-        event.logicalKey == LogicalKeyboardKey.backspace &&
-        _controllers[index].text.isEmpty &&
-        index > 0) {
-      // ارجع للخانة اللي قبلها
-      _focusNodes[index - 1].requestFocus();
-      _controllers[index - 1].clear();
-    }
-  }
 
   void _submit() {
     if (!_isComplete) return;
@@ -204,48 +177,63 @@ class _OtpFormState extends State<OtpForm> {
                   return SizedBox(
                     width: actualWidth,
                     height: isSmallScreen ? 50 : 55,
-                    child: RawKeyboardListener(
-                      focusNode: FocusNode(),
-                      onKey: (event) => _onKeyPressed(index, event),
-                      child: TextField(
-                        controller: _controllers[index],
-                        focusNode: _focusNodes[index],
-                        textAlign: TextAlign.center,
-                        keyboardType: TextInputType.number,
-                        maxLength: 1,
-                        style: TextStyle(
-                          fontSize: isSmallScreen ? 20 : 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        decoration: InputDecoration(
-                          counterText: '',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          filled: true,
-                          fillColor: Colors.grey[100],
-                          contentPadding: EdgeInsets.zero,
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(
-                              color: Colors.grey[300]!,
-                              width: 1.5,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(
-                              color: theme.primaryColor,
-                              width: 2,
-                            ),
-                          ),
-                        ),
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                          LengthLimitingTextInputFormatter(1),
-                        ],
-                        onChanged: (value) => _onChanged(index, value),
+                    child: TextField(
+                      controller: _controllers[index],
+                      focusNode: _focusNodes[index],
+                      textAlign: TextAlign.center,
+                      keyboardType: TextInputType.number,
+                      maxLength: 1,
+                      autofocus: index == 0,
+                      style: TextStyle(
+                        fontSize: isSmallScreen ? 20 : 24,
+                        fontWeight: FontWeight.bold,
                       ),
+                      decoration: InputDecoration(
+                        counterText: '',
+                        filled: true,
+                        fillColor: Colors.grey[100],
+                        contentPadding: EdgeInsets.zero,
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: Colors.grey[300]!,
+                            width: 1.5,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: theme.primaryColor,
+                            width: 2,
+                          ),
+                        ),
+                      ),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(1),
+                      ],
+                      onChanged: (value) {
+                        if (value.isNotEmpty) {
+                          // الرقم موجود، انتقل للخانة التالية
+                          if (index < 5) {
+                            _focusNodes[index + 1].requestFocus();
+                          } else {
+                            // آخر خانة، تحقق من الاكتمال
+                            FocusScope.of(context).unfocus();
+                            if (_isComplete) {
+                              _submit();
+                            }
+                          }
+                        }
+                        setState(() {});
+                      },
+                      onTap: () {
+                        // اختار كل النص عند الضغط للتسهيل على User
+                        _controllers[index].selection = TextSelection(
+                          baseOffset: 0,
+                          extentOffset: _controllers[index].text.length,
+                        );
+                      },
                     ),
                   );
                 }),
