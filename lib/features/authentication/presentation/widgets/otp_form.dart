@@ -187,11 +187,12 @@ class _OtpFormState extends State<OtpForm> {
                       style: TextStyle(
                         fontSize: isSmallScreen ? 20 : 24,
                         fontWeight: FontWeight.bold,
+                        color: Colors.black,  // ✅ لون الأرقام أسود
                       ),
                       decoration: InputDecoration(
                         counterText: '',
                         filled: true,
-                        fillColor: Colors.grey[100],
+                        fillColor: Colors.white,  // ✅ خلفية بيضاء للوضوح
                         contentPadding: EdgeInsets.zero,
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
