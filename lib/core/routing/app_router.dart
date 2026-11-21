@@ -16,7 +16,25 @@ import 'package:go_router/go_router.dart';
 GoRouter buildRouter(AuthenticationCubit authCubit) {
   return GoRouter(
     initialLocation: '/login',
+    debugLogDiagnostics: true,
     refreshListenable: _AuthRefresh(authCubit),
+    errorBuilder: (context, state) => Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error, size: 64, color: Colors.red),
+            const SizedBox(height: 16),
+            Text('Navigation Error: ${state.error}'),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => context.go('/login'),
+              child: const Text('Go to Login'),
+            ),
+          ],
+        ),
+      ),
+    ),
     redirect: (context, state) {
       final authState = authCubit.state;
       final session = authCubit.session;

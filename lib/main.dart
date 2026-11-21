@@ -12,9 +12,22 @@ import 'package:app_links/app_links.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await configureDependencies();
-
-  runApp(const CoditApp());
+  
+  try {
+    await configureDependencies();
+    runApp(const CoditApp());
+  } catch (e) {
+    print('Error initializing app: $e');
+    runApp(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Text('Error: $e'),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class CoditApp extends StatefulWidget {
@@ -66,7 +79,7 @@ class _CoditAppState extends State<CoditApp> {
       value: authCubit,
       child: MaterialApp.router(
         debugShowCheckedModeBanner: false,
-        onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
+        title: 'CODIT',
         theme: LuxuryTheme.darkTheme,
         locale: const Locale('ar'),
         supportedLocales: const [Locale('ar')],
