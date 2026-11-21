@@ -11,6 +11,13 @@ analyzer:
     - "**/generated/**"
     - "**/_deprecated/**"  # Ignore deprecated old code
     - "lib/**/_deprecated/**"
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
   
   errors:
     # Treat missing required parameters as errors

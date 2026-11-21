@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:codit/core/deep_linking/deep_link_handler.dart';
 import 'package:codit/core/di/injection.dart';
 import 'package:codit/core/localization/app_localizations.dart';
@@ -5,7 +6,6 @@ import 'package:codit/core/routing/app_router.dart';
 import 'package:codit/core/theme/luxury_theme.dart';
 import 'package:codit/features/authentication/presentation/authentication_cubit.dart';
 import 'package:codit/features/installments/data/sync_worker.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
