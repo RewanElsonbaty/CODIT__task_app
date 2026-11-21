@@ -1,0 +1,52 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  language:
+    strict-casts: false
+    strict-raw-types: false
+  
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+    - "**/generated/**"
+    - "**/_deprecated/**"  # Ignore deprecated old code
+    - "lib/**/_deprecated/**"
+  
+  errors:
+    # Treat missing required parameters as errors
+    missing_required_param: error
+    # Treat missing returns as errors
+    missing_return: error
+    # Allow TODOs
+    todo: ignore
+    # Deprecated member use is just info
+    deprecated_member_use: info
+    deprecated_member_use_from_same_package: ignore
+    # Type issues
+    invalid_annotation_target: ignore
+    # File names
+    file_names: ignore
+
+linter:
+  rules:
+    - avoid_print
+    - avoid_unnecessary_containers
+    - avoid_web_libraries_in_flutter
+    - cancel_subscriptions
+    - close_sinks
+    - no_adjacent_strings_in_list
+    - prefer_const_constructors
+    - prefer_const_declarations
+    - prefer_const_literals_to_create_immutables
+    - prefer_final_fields
+    - prefer_single_quotes
+    - sort_pub_dependencies
+    - unnecessary_const
+    - unnecessary_new
+    - use_key_in_widget_constructors
+    - valid_regexps
+    
+    # Disable some annoying rules
+    - avoid_types_as_parameter_names: false
+    - constant_identifier_names: false
+    - non_constant_identifier_names: false

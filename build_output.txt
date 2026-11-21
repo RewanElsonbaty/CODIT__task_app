@@ -1,0 +1,20 @@
+W These options have been removed and were ignored: --delete-conflicting-outputs
+  0s freezed on 156 inputs; lib/core/config/app_config.dart
+  0s freezed on 156 inputs: 1 no-op; lib/core/database/app_database.dart
+  5s freezed on 156 inputs: 2 no-op; spent 2s analyzing, 2s reading; lib/core/database/database_tables.dart
+  66s freezed on 156 inputs: 2 output, 54 no-op; spent 51s reading, 11s analyzing, 4s resolving; lib/features/auth/presentation/auth_wrapper.dart
+  66s freezed on 156 inputs: 5 output, 151 no-op; spent 51s reading, 11s analyzing, 4s resolving
+  0s json_serializable on 312 inputs; lib/core/config/app_config.dart
+  9s json_serializable on 312 inputs: 3 skipped, 4 no-op; spent 5s analyzing, 3s reading, 1s resolving; lib/core/deep_linking/deep_link_handler.freezed.dart
+  10s json_serializable on 312 inputs: 4 skipped, 5 no-op; spent 5s analyzing, 4s reading, 1s resolving; lib/core/di/injection.freezed.dart
+  22s json_serializable on 312 inputs: 47 skipped, 48 no-op; spent 15s analyzing, 5s reading, 2s resolving; lib/features/auth/data/services/device_info_service.freezed.dart
+  23s json_serializable on 312 inputs: 114 skipped, 3 output, 122 no-op; spent 15s analyzing, 5s reading, 2s resolving; lib/features/installments/presentation/collection_form_page.freezed.dart
+  33s json_serializable on 312 inputs: 139 skipped, 3 output, 147 no-op; spent 19s analyzing, 9s reading, 2s resolving, 2s building; test/core/secure_logger_test.freezed.dart
+  34s json_serializable on 312 inputs: 141 skipped, 3 output, 149 no-op; spent 20s analyzing, 10s reading, 2s resolving, 2s building; test/features/approvals/approval_details_cubit_test.freezed.dart
+  34s json_serializable on 312 inputs: 151 skipped, 3 output, 158 no-op; spent 20s analyzing, 10s reading, 2s resolving, 2s building
+  0s drift_dev on 1248 inputs; lib/core/config/app_config.dart
+  1s drift_dev on 1248 inputs: 153 skipped, 164 output; lib/core/database/database_tables.freezed.dart
+  1s drift_dev on 1248 inputs: 765 skipped, 309 output, 174 no-op
+  0s source_gen:combining_builder on 624 inputs; lib/core/config/app_config.dart
+  0s source_gen:combining_builder on 624 inputs: 463 skipped, 4 output, 157 no-op
+  Built with build_runner/aot in 111s; wrote 321 outputs.

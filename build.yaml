@@ -1,0 +1,14 @@
+# Build configuration for code generation
+targets:
+  $default:
+    builders:
+      freezed:
+        options:
+          # Enable JSON serialization for all freezed classes
+          json_serializable: true
+          # Use @freezed instead of @Freezed()
+          mutable: false
+          # Generate copyWith methods
+          copyWith: true
+          # Generate == and hashCode
+          equal: true
