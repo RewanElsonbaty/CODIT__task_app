@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/responsive_utils.dart';
 import '../domain/gold_models.dart';
@@ -57,6 +58,14 @@ class _GoldSaleView extends StatelessWidget {
           ],
         ),
         actions: [
+          // زر الرجوع للصفحة الرئيسية
+          IconButton(
+            icon: const Icon(Icons.home, color: AppColors.goldenNeon),
+            onPressed: () {
+              context.go('/home');
+            },
+            tooltip: 'الصفحة الرئيسية',
+          ),
           // زر المسودات
           IconButton(
             icon: const Icon(Icons.drafts, color: AppColors.goldenNeon),

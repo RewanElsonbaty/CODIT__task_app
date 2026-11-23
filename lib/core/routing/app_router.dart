@@ -5,6 +5,9 @@ import 'package:codit/features/authentication/presentation/login_page.dart';
 import 'package:codit/features/authentication/presentation/otp_page.dart';
 import 'package:codit/features/gold_sales/presentation/gold_sale_page.dart';
 import 'package:codit/features/notifications/presentation/pages/notifications_page.dart';
+import 'package:codit/features/approvals/presentation/approvals_page.dart';
+import 'package:codit/features/installments/presentation/installments_page.dart';
+import 'package:codit/features/branches/presentation/branches_page.dart';
 import 'package:codit/core/widgets/font_test_widget.dart';
 import 'package:codit/mocks/scenario_panel_page.dart';
 import 'package:flutter/material.dart';
@@ -74,10 +77,10 @@ GoRouter buildRouter(AuthenticationCubit authCubit) {
       // Gold Sales
       GoRoute(path: '/gold', builder: (_, _) => const GoldSalePage()),
 
-      // Approvals (placeholder for new screens)
+      // Approvals
       GoRoute(
         path: '/approvals',
-        builder: (_, _) => const _PlaceholderPage(title: 'Approvals'),
+        builder: (_, _) => const ApprovalsPage(),
       ),
       GoRoute(
         path: '/approvals/:id',
@@ -87,16 +90,16 @@ GoRouter buildRouter(AuthenticationCubit authCubit) {
         ),
       ),
 
-      // Installments (placeholder for new screens)
+      // Installments
       GoRoute(
         path: '/installments',
-        builder: (_, _) => const _PlaceholderPage(title: 'Installments'),
+        builder: (_, _) => const InstallmentsPage(),
       ),
 
-      // Branch Monitoring (placeholder for new screens)
+      // Branch Monitoring
       GoRoute(
         path: '/branches',
-        builder: (_, _) => const _PlaceholderPage(title: 'Branch Monitoring'),
+        builder: (_, _) => const BranchesPage(),
       ),
 
       // Dev Tools
