@@ -40,7 +40,7 @@ class _ApprovalDetailsScreenState extends State<ApprovalDetailsScreen> {
     setState(() => _isProcessing = true);
 
     try {
-      final result = await _api.approveRequest(
+      final result = await _api.approveRequestFull(
         requestId: _currentRequest['id'],
         userId: userId,
         notes: null,
@@ -89,7 +89,7 @@ class _ApprovalDetailsScreenState extends State<ApprovalDetailsScreen> {
     setState(() => _isProcessing = true);
 
     try {
-      final result = await _api.rejectRequest(
+      final result = await _api.rejectRequestFull(
         requestId: _currentRequest['id'],
         userId: userId,
         reason: reason,

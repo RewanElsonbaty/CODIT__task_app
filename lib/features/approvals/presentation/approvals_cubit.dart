@@ -1,31 +1,59 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 import '../data/mock_approvals_api.dart';
-
-part 'approvals_cubit.freezed.dart';
+import '../../../core/cache/cache_manager.dart';
+import '../../../core/di/injection.dart';
 
 class ApprovalsCubit extends Cubit<ApprovalsState> {
   final MockApprovalsApi _api = MockApprovalsApi();
+  final CacheManager _cache = getIt<CacheManager>();
 
-  ApprovalsCubit() : super(const ApprovalsState.loading()) {
+  ApprovalsCubit() : super(ApprovalsLoading()) {
     loadApprovals();
   }
 
   Future<void> loadApprovals() async {
     try {
-      emit(const ApprovalsState.loading());
+      emit(ApprovalsLoading());
+      
+      // محاولة جلب من الكاش أولاً
+      final cachedApprovals = await _cache.getCachedApprovals();
+      if (cachedApprovals != null && cachedApprovals.isNotEmpty) {
+        emit(ApprovalsLoaded(
+          approvals: cachedApprovals,
+          selectedFilter: 'الكل',
+          isFromCache: true,
+        ));
+      }
       
       // محاكاة تأخير الشبكة
       await Future.delayed(const Duration(milliseconds: 500));
       
       final approvals = await _api.getApprovals();
       
-      emit(ApprovalsState.loaded(
+      // حفظ في الكاش
+      await _cache.cacheApprovals(approvals);
+      
+      emit(ApprovalsLoaded(
         approvals: approvals,
         selectedFilter: 'الكل',
+        isFromCache: false,
       ));
     } catch (e) {
-      emit(ApprovalsState.error(message: e.toString()));
+      // في حالة الخطأ، نحاول جلب من الكاش
+      final cachedApprovals = await _cache.getCachedApprovals();
+      if (cachedApprovals != null && cachedApprovals.isNotEmpty) {
+        emit(ApprovalsLoaded(
+          approvals: cachedApprovals,
+          selectedFilter: 'الكل',
+          isFromCache: true,
+        ));
+      } else {
+        emit(ApprovalsError(
+          message: e.toString(),
+          onRetry: loadApprovals,
+        ));
+      }
     }
   }
 
@@ -33,7 +61,11 @@ class ApprovalsCubit extends Cubit<ApprovalsState> {
     final currentState = state;
     if (currentState is! ApprovalsLoaded) return;
 
-    emit(currentState.copyWith(selectedFilter: filter));
+    emit(ApprovalsLoaded(
+      approvals: currentState.approvals,
+      selectedFilter: filter,
+      isFromCache: currentState.isFromCache,
+    ));
   }
 
   List<Map<String, dynamic>> getFilteredApprovals() {
@@ -68,7 +100,10 @@ class ApprovalsCubit extends Cubit<ApprovalsState> {
       await _api.approveRequest(requestId);
       await loadApprovals();
     } catch (e) {
-      emit(ApprovalsState.error(message: e.toString()));
+      emit(ApprovalsError(
+        message: e.toString(),
+        onRetry: loadApprovals,
+      ));
     }
   }
 
@@ -77,19 +112,37 @@ class ApprovalsCubit extends Cubit<ApprovalsState> {
       await _api.rejectRequest(requestId, reason);
       await loadApprovals();
     } catch (e) {
-      emit(ApprovalsState.error(message: e.toString()));
+      emit(ApprovalsError(
+        message: e.toString(),
+        onRetry: loadApprovals,
+      ));
     }
   }
 }
 
-@freezed
-class ApprovalsState with _$ApprovalsState {
-  const factory ApprovalsState.loading() = ApprovalsLoading;
-  
-  const factory ApprovalsState.loaded({
-    required List<Map<String, dynamic>> approvals,
-    required String selectedFilter,
-  }) = ApprovalsLoaded;
-  
-  const factory ApprovalsState.error({required String message}) = ApprovalsError;
+// States without Freezed
+abstract class ApprovalsState {}
+
+class ApprovalsLoading extends ApprovalsState {}
+
+class ApprovalsLoaded extends ApprovalsState {
+  final List<Map<String, dynamic>> approvals;
+  final String selectedFilter;
+  final bool isFromCache;
+
+  ApprovalsLoaded({
+    required this.approvals,
+    required this.selectedFilter,
+    this.isFromCache = false,
+  });
+}
+
+class ApprovalsError extends ApprovalsState {
+  final String message;
+  final VoidCallback? onRetry;
+
+  ApprovalsError({
+    required this.message,
+    this.onRetry,
+  });
 }

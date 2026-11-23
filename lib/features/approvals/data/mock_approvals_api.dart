@@ -302,8 +302,8 @@ class MockApprovalsApi {
     };
   }
 
-  /// رفض طلب
-  Future<Map<String, dynamic>> rejectRequest({
+  /// رفض طلب (النسخة الكاملة)
+  Future<Map<String, dynamic>> rejectRequestFull({
     required String requestId,
     required String userId,
     required String reason,

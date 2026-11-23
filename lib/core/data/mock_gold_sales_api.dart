@@ -1,12 +1,10 @@
-import 'dart:math';
-import '../../../core/data/mock_api_client.dart';
-import '../domain/gold_models.dart';
+import 'mock_api_client.dart';
+import '../../features/gold_sales/domain/gold_models.dart';
 
 /// Mock Gold Sales API
 /// يحاكي عمليات البيع والمخزون والمنتجات
 class MockGoldSalesApi {
   final MockApiClient _client = MockApiClient();
-  final Random _random = Random();
 
   // Mock Products Database
   final List<GoldProduct> _products = [];
@@ -23,76 +21,56 @@ class MockGoldSalesApi {
     // منتجات تجريبية
     _products.addAll([
       // خواتم
-      GoldProduct(
-        id: 'prod_001',
+      const GoldProduct(
         code: 'RING-001',
         barcode: '1234567890123',
         name: 'خاتم ذهب عيار 21 - موديل كلاسيك',
-        karat: GoldKarat.k21,
+        karat: Karat.k21,
         grossWeightMg: 4500,
         stonesWeightMg: 300,
-        category: 'خواتم',
-        pricePerGramPiastres: 420000, // 4200 جنيه
-        makingChargePerGramPiastres: 12000, // 120 جنيه
-        taxPercentage: 14,
+        status: ProductStatus.available,
       ),
-      GoldProduct(
-        id: 'prod_002',
+      const GoldProduct(
         code: 'RING-002',
         barcode: '1234567890124',
         name: 'خاتم ذهب عيار 18 - موديل فرنسي',
-        karat: GoldKarat.k18,
+        karat: Karat.k18,
         grossWeightMg: 3500,
         stonesWeightMg: 200,
-        category: 'خواتم',
-        pricePerGramPiastres: 380000,
-        makingChargePerGramPiastres: 15000,
-        taxPercentage: 14,
+        status: ProductStatus.available,
       ),
 
       // سلاسل
-      GoldProduct(
-        id: 'prod_003',
+      const GoldProduct(
         code: 'CHAIN-001',
         barcode: '1234567890125',
         name: 'سلسلة ذهب عيار 21 - 50 سم',
-        karat: GoldKarat.k21,
+        karat: Karat.k21,
         grossWeightMg: 12000,
         stonesWeightMg: 0,
-        category: 'سلاسل',
-        pricePerGramPiastres: 420000,
-        makingChargePerGramPiastres: 8000,
-        taxPercentage: 14,
+        status: ProductStatus.available,
       ),
 
       // أساور
-      GoldProduct(
-        id: 'prod_004',
+      const GoldProduct(
         code: 'BRAC-001',
         barcode: '1234567890126',
         name: 'أسورة ذهب عيار 21 - موديل إيطالي',
-        karat: GoldKarat.k21,
+        karat: Karat.k21,
         grossWeightMg: 18000,
         stonesWeightMg: 500,
-        category: 'أساور',
-        pricePerGramPiastres: 420000,
-        makingChargePerGramPiastres: 10000,
-        taxPercentage: 14,
+        status: ProductStatus.available,
       ),
 
       // أقراط
-      GoldProduct(
-        id: 'prod_005',
+      const GoldProduct(
         code: 'EARR-001',
         barcode: '1234567890127',
         name: 'أقراط ذهب عيار 18 - مرصع ألماس',
-        karat: GoldKarat.k18,
+        karat: Karat.k18,
         grossWeightMg: 6000,
         stonesWeightMg: 800,
-        category: 'أقراط',
-        pricePerGramPiastres: 380000,
-        makingChargePerGramPiastres: 20000,
-        taxPercentage: 14,
+        status: ProductStatus.available,
       ),
     ]);
   }
@@ -112,9 +90,11 @@ class MockGoldSalesApi {
 
     GoldProduct? product;
     if (code != null) {
-      product = _products.where((p) => p.code == code).firstOrNull;
+      final results = _products.where((p) => p.code == code);
+      product = results.isNotEmpty ? results.first : null;
     } else if (barcode != null) {
-      product = _products.where((p) => p.barcode == barcode).firstOrNull;
+      final results = _products.where((p) => p.barcode == barcode);
+      product = results.isNotEmpty ? results.first : null;
     }
 
     if (product == null) {
@@ -126,24 +106,18 @@ class MockGoldSalesApi {
 
   /// الحصول على جميع المنتجات
   Future<Map<String, dynamic>> getAllProducts({
-    String? category,
-    GoldKarat? karat,
+    Karat? karat,
     int? limit,
   }) async {
     await _client.get(
       '/products',
       queryParams: {
-        if (category != null) 'category': category,
         if (karat != null) 'karat': karat.name,
         if (limit != null) 'limit': limit.toString(),
       },
     );
 
     var filtered = _products;
-
-    if (category != null) {
-      filtered = filtered.where((p) => p.category == category).toList();
-    }
 
     if (karat != null) {
       filtered = filtered.where((p) => p.karat == karat).toList();
@@ -186,7 +160,8 @@ class MockGoldSalesApi {
   Future<Map<String, dynamic>> getInvoice(String invoiceId) async {
     await _client.get('/invoices/$invoiceId');
 
-    final invoice = _invoices.where((i) => i['id'] == invoiceId).firstOrNull;
+    final results = _invoices.where((i) => i['id'] == invoiceId);
+    final invoice = results.isNotEmpty ? results.first : null;
 
     if (invoice == null) {
       return {'success': false, 'error': 'الفاتورة غير موجودة'};
@@ -263,9 +238,8 @@ class MockGoldSalesApi {
 
     // التحقق من توفر المنتجات
     for (final item in invoice.lineItems) {
-      final product = _products
-          .where((p) => p.id == item.product.id)
-          .firstOrNull;
+      final results = _products.where((p) => p.code == item.product.code);
+      final product = results.isNotEmpty ? results.first : null;
       if (product == null) {
         errors.add('المنتج ${item.product.name} غير متوفر');
       }
@@ -324,9 +298,4 @@ class MockGoldSalesApi {
     _invoices.clear();
     _initializeMockData();
   }
-}
-
-/// Extension لدعم firstOrNull
-extension FirstWhereOrNullExtension<E> on Iterable<E> {
-  E? get firstOrNull => isEmpty ? null : first;
 }

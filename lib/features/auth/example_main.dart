@@ -217,11 +217,11 @@ class HomePage extends StatelessWidget {
             const SizedBox(height: 48),
             BlocBuilder<AuthCubit, AuthState>(
               builder: (context, state) {
-                return state.maybeWhen(
-                  authenticated: (user, _, __) => Column(
+                if (state is AuthAuthenticated) {
+                  return Column(
                     children: [
                       Text(
-                        'مرحباً ${user.name}',
+                        'مرحباً ${state.user.name}',
                         style: const TextStyle(
                           fontSize: 18,
                           color: Colors.white,
@@ -229,16 +229,16 @@ class HomePage extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        user.phone,
+                        state.user.phone,
                         style: const TextStyle(
                           fontSize: 14,
                           color: Colors.white60,
                         ),
                       ),
                     ],
-                  ),
-                  orElse: () => const SizedBox.shrink(),
-                );
+                  );
+                }
+                return const SizedBox.shrink();
               },
             ),
           ],

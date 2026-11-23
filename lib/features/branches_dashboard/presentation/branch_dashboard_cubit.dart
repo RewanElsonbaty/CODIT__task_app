@@ -1,13 +1,10 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:dartz/dartz.dart';
 import '../../../core/errors/failures.dart';
 import '../domain/models/branch_summary.dart';
 import '../domain/models/branch_selection.dart';
 import '../domain/repositories/branch_dashboard_repository.dart';
-
-part 'branch_dashboard_cubit.freezed.dart';
 
 /// Cubit for branch dashboard with real-time updates and sequence tracking
 class BranchDashboardCubit extends Cubit<BranchDashboardState> {
@@ -22,11 +19,11 @@ class BranchDashboardCubit extends Cubit<BranchDashboardState> {
   String? _currentBranchId;
 
   BranchDashboardCubit(this._repository)
-      : super(const BranchDashboardState.loading());
+      : super(BranchDashboardLoading());
 
   /// Initialize dashboard with selected branch
   Future<void> initialize({String? branchId}) async {
-    emit(const BranchDashboardState.loading());
+    emit(BranchDashboardLoading());
     
     _currentBranchId = branchId;
     await _cancelCurrentSubscription();
@@ -41,7 +38,7 @@ class BranchDashboardCubit extends Cubit<BranchDashboardState> {
     // Ignore if already on this branch
     if (newBranchId == _currentBranchId) return;
     
-    emit(const BranchDashboardState.loading());
+    emit(BranchDashboardLoading());
     
     _currentBranchId = newBranchId;
     await _cancelCurrentSubscription();
@@ -53,7 +50,7 @@ class BranchDashboardCubit extends Cubit<BranchDashboardState> {
   Future<void> refresh() async {
     final currentBranchId = _currentBranchId;
     
-    emit(const BranchDashboardState.loading());
+    emit(BranchDashboardLoading());
     await _cancelCurrentSubscription();
     
     await _loadSnapshot(currentBranchId);
@@ -69,12 +66,12 @@ class BranchDashboardCubit extends Cubit<BranchDashboardState> {
         final cached = await _repository.getCachedSnapshot(branchId: branchId);
         
         if (cached != null) {
-          emit(BranchDashboardState.offline(
+          emit(BranchDashboardOffline(
             summary: cached,
             lastUpdate: cached.lastUpdate,
           ));
         } else {
-          emit(BranchDashboardState.error(message: failure.message));
+          emit(BranchDashboardError(message: failure.message));
         }
       },
       (summary) {
@@ -89,7 +86,7 @@ class BranchDashboardCubit extends Cubit<BranchDashboardState> {
         // Cache for offline access
         _repository.cacheSnapshot(summary);
         
-        emit(BranchDashboardState.loaded(summary: summary));
+        emit(BranchDashboardLoaded(summary: summary));
         
         // Start listening to updates
         _startListeningToUpdates(branchId);
@@ -120,7 +117,7 @@ class BranchDashboardCubit extends Cubit<BranchDashboardState> {
     }
     
     final currentState = state;
-    if (currentState is! _Loaded) return;
+    if (currentState is! BranchDashboardLoaded) return;
     
     final currentSummary = currentState.summary;
     
@@ -146,7 +143,7 @@ class BranchDashboardCubit extends Cubit<BranchDashboardState> {
     // Cache updated data
     _repository.cacheSnapshot(updatedSummary);
     
-    emit(BranchDashboardState.loaded(summary: updatedSummary));
+    emit(BranchDashboardLoaded(summary: updatedSummary));
   }
 
   /// Apply incremental update to current summary
@@ -195,27 +192,29 @@ class BranchDashboardCubit extends Cubit<BranchDashboardState> {
 }
 
 /// Branch dashboard state
-@freezed
-class BranchDashboardState with _$BranchDashboardState {
-  /// Loading initial data
-  const factory BranchDashboardState.loading() = _Loading;
+abstract class BranchDashboardState {}
 
-  /// Data loaded and actively receiving updates
-  const factory BranchDashboardState.loaded({
-    required BranchSummary summary,
-  }) = _Loaded;
+/// Loading initial data
+class BranchDashboardLoading extends BranchDashboardState {}
 
-  /// Offline mode - showing cached data
-  const factory BranchDashboardState.offline({
-    required BranchSummary summary,
-    required DateTime lastUpdate,
-  }) = _Offline;
-
-  /// Error loading data
-  const factory BranchDashboardState.error({
-    required String message,
-  }) = _Error;
-
-  /// No data available
-  const factory BranchDashboardState.empty() = _Empty;
+/// Data loaded and actively receiving updates
+class BranchDashboardLoaded extends BranchDashboardState {
+  final BranchSummary summary;
+  BranchDashboardLoaded({required this.summary});
 }
+
+/// Offline mode - showing cached data
+class BranchDashboardOffline extends BranchDashboardState {
+  final BranchSummary summary;
+  final DateTime lastUpdate;
+  BranchDashboardOffline({required this.summary, required this.lastUpdate});
+}
+
+/// Error loading data
+class BranchDashboardError extends BranchDashboardState {
+  final String message;
+  BranchDashboardError({required this.message});
+}
+
+/// No data available
+class BranchDashboardEmpty extends BranchDashboardState {}

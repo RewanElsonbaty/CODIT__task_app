@@ -127,10 +127,7 @@ class _DeviceVerificationScreenState extends State<DeviceVerificationScreen>
                   // Buttons
                   BlocBuilder<AuthCubit, AuthState>(
                     builder: (context, state) {
-                      final isLoading = state.maybeWhen(
-                        loading: () => true,
-                        orElse: () => false,
-                      );
+                      final isLoading = state is AuthLoading;
 
                       return Column(
                         children: [

@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/responsive_utils.dart';
+import '../../../core/di/injection.dart';
+import '../../../core/data/mock_gold_sales_api.dart';
 import '../domain/gold_models.dart';
 import 'gold_sale_cubit.dart';
 import 'widgets/gold_sale_widgets.dart';
@@ -13,7 +15,7 @@ class GoldSalePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => GoldSaleCubit()..startNew(),
+      create: (_) => GoldSaleCubit(getIt<MockGoldSalesApi>())..startNew(),
       child: const _GoldSaleView(),
     );
   }

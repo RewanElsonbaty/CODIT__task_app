@@ -141,23 +141,6 @@ enum GoldCategory {
   }
 }
 
-// Stub Views for old code
-class _GoldSaleView {
-  const _GoldSaleView();
-}
-
-class _GoldInvoiceView {
-  const _GoldInvoiceView();
-}
-
-class _ProductSearchSection {
-  const _ProductSearchSection();
-}
-
-class _TradeInSection {
-  const _TradeInSection();
-}
-
 class _ActionButtons {
   const _ActionButtons();
 }

@@ -54,7 +54,7 @@ void main() {
       expect(initialVersion, 1);
 
       // 2. الموافقة على الطلب
-      final approveResult = await api.approveRequest(
+      final approveResult = await api.approveRequestFull(
         requestId: requestId,
         userId: 'user_002',
         notes: 'موافق',
@@ -83,7 +83,7 @@ void main() {
       final requestId = createResult['data']['id'] as String;
 
       // 2. الموافقة الأولى (تزيد النسخة من 1 إلى 2)
-      await api.approveRequest(
+      await api.approveRequestFull(
         requestId: requestId,
         userId: 'user_002',
       );
@@ -128,7 +128,7 @@ void main() {
       expect(version2, 1);
 
       // 4. المستخدم الأول يوافق (version يصبح 2)
-      await api.approveRequest(
+      await api.approveRequestFull(
         requestId: requestId,
         userId: 'user_002',
       );
@@ -166,7 +166,7 @@ void main() {
       final requestId = createResult['data']['id'] as String;
 
       // 2. الموافقة الأولى - الحالة تبقى pending
-      final approve1 = await api.approveRequest(
+      final approve1 = await api.approveRequestFull(
         requestId: requestId,
         userId: 'user_002',
       );
@@ -175,7 +175,7 @@ void main() {
       expect(approve1['data']['all_approved'], false);
 
       // 3. الموافقة الثانية - الحالة تصبح approved
-      final approve2 = await api.approveRequest(
+      final approve2 = await api.approveRequestFull(
         requestId: requestId,
         userId: 'user_001',
       );
@@ -203,7 +203,7 @@ void main() {
       final requestId = createResult['data']['id'] as String;
 
       // 2. الرفض من المستخدم الأول
-      final rejectResult = await api.rejectRequest(
+      final rejectResult = await api.rejectRequestFull(
         requestId: requestId,
         userId: 'user_002',
         reason: 'تجاوز المدة المسموحة',
@@ -215,7 +215,7 @@ void main() {
 
       // 4. المستخدم الثاني لا يستطيع الموافقة بعد الرفض
       expect(
-        () => api.approveRequest(
+        () => api.approveRequestFull(
           requestId: requestId,
           userId: 'user_001',
         ),

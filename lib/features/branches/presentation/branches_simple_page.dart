@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/shimmer_loading.dart';
 import 'branches_cubit.dart';
 
 class BranchesSimplePage extends StatelessWidget {
@@ -82,53 +83,59 @@ class _BranchesPageContent extends StatelessWidget {
       ),
       body: BlocBuilder<BranchesCubit, BranchesState>(
         builder: (context, state) {
-          return state.when(
-            loading: () => const Center(
-              child: CircularProgressIndicator(color: Colors.purple),
-            ),
-            loaded: (branches, statistics) {
-              return Column(
-                children: [
-                  // ملخص عام
-                  _buildSummarySection(statistics),
+          if (state is BranchesLoading) {
+            return const ShimmerBranchesList();
+          } else if (state is BranchesLoaded) {
+            return Column(
+              children: [
+                // ملخص عام
+                _buildSummarySection(state.statistics),
 
-                  // قائمة الفروع
-                  Expanded(
-                    child: RefreshIndicator(
-                      onRefresh: () => context.read<BranchesCubit>().loadBranches(),
-                      color: Colors.purple,
-                      child: ListView.builder(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: branches.length,
-                        itemBuilder: (context, index) {
-                          final branch = branches[index];
-                          return _buildBranchCard(branch);
-                        },
-                      ),
+                // قائمة الفروع
+                Expanded(
+                  child: RefreshIndicator(
+                    onRefresh: () => context.read<BranchesCubit>().loadBranches(),
+                    color: Colors.purple,
+                    child: ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: state.branches.length,
+                      itemBuilder: (context, index) {
+                        final branch = state.branches[index];
+                        return _buildBranchCard(branch);
+                      },
                     ),
                   ),
-                ],
-              );
-            },
-            error: (message) => Center(
+                ),
+              ],
+            );
+          } else if (state is BranchesError) {
+            return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Icon(Icons.error, size: 64, color: AppColors.errorLight),
                   const SizedBox(height: 16),
                   Text(
-                    'حدث خطأ: $message',
+                    'حدث خطأ: ${state.message}',
                     style: const TextStyle(color: AppColors.errorLight),
+                    textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () => context.read<BranchesCubit>().loadBranches(),
-                    child: const Text('إعادة المحاولة'),
+                  ElevatedButton.icon(
+                    onPressed: state.onRetry ?? () => context.read<BranchesCubit>().loadBranches(),
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('إعادة المحاولة'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.purple,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    ),
                   ),
                 ],
               ),
-            ),
-          );
+            );
+          }
+          return const SizedBox.shrink();
         },
       ),
     );

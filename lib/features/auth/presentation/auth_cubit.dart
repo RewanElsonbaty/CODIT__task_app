@@ -1,10 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 import '../domain/models/auth_models.dart';
 import '../domain/repositories/auth_repository.dart';
 import '../data/services/token_manager.dart';
-
-part 'auth_cubit.freezed.dart';
 
 /// Authentication cubit managing the entire auth flow
 class AuthCubit extends Cubit<AuthState> {
@@ -12,19 +9,19 @@ class AuthCubit extends Cubit<AuthState> {
   final TokenManager _tokenManager;
 
   AuthCubit(this._repository, this._tokenManager)
-      : super(const AuthState.initial());
+      : super(AuthInitial());
 
   /// Check if user is already authenticated
   Future<void> checkAuthStatus() async {
-    emit(const AuthState.checking());
+    emit(AuthChecking());
 
     final tokens = await _repository.getStoredTokens();
     final user = await _repository.getStoredUser();
 
     if (tokens != null && user != null && tokens.isValid) {
-      emit(AuthState.authenticated(user: user, tokens: tokens));
+      emit(AuthAuthenticated(user: user, tokens: tokens));
     } else {
-      emit(const AuthState.unauthenticated());
+      emit(AuthUnauthenticated());
     }
   }
 
@@ -35,7 +32,7 @@ class AuthCubit extends Cubit<AuthState> {
     String? deviceId,
     String? deviceName,
   }) async {
-    emit(const AuthState.loading());
+    emit(AuthLoading());
 
     final request = LoginRequest(
       phone: phone,
@@ -47,17 +44,17 @@ class AuthCubit extends Cubit<AuthState> {
     final result = await _repository.login(request);
 
     result.fold(
-      (failure) => emit(AuthState.error(message: failure.message)),
+      (failure) => emit(AuthError(message: failure.message)),
       (response) {
         if (response.requiresOtp) {
           // OTP required
-          emit(AuthState.otpRequired(
+          emit(AuthOtpRequired(
             sessionId: response.sessionId!,
             phone: phone,
           ));
         } else if (response.requiresDeviceVerification) {
           // Device verification required
-          emit(const AuthState.deviceVerificationRequired(
+          emit(AuthDeviceVerificationRequired(
             deviceVerificationId: '', // TODO: Get from response
           ));
         } else {
@@ -74,7 +71,7 @@ class AuthCubit extends Cubit<AuthState> {
     required String otp,
     String? deviceId,
   }) async {
-    emit(const AuthState.loading());
+    emit(AuthLoading());
 
     final request = OtpVerificationRequest(
       sessionId: sessionId,
@@ -85,11 +82,11 @@ class AuthCubit extends Cubit<AuthState> {
     final result = await _repository.verifyOtp(request);
 
     result.fold(
-      (failure) => emit(AuthState.error(message: failure.message)),
+      (failure) => emit(AuthError(message: failure.message)),
       (response) {
         if (response.requiresDeviceVerification) {
           // Device verification required
-          emit(AuthState.deviceVerificationRequired(
+          emit(AuthDeviceVerificationRequired(
             deviceVerificationId: response.deviceVerificationId!,
           ));
         } else {
@@ -107,20 +104,18 @@ class AuthCubit extends Cubit<AuthState> {
     final result = await _repository.resendOtp(request);
 
     result.fold(
-      (failure) => emit(AuthState.error(message: failure.message)),
+      (failure) => emit(AuthError(message: failure.message)),
       (_) {
         // OTP resent successfully
         // Keep current state (otpRequired) but show success message
-        state.maybeWhen(
-          otpRequired: (sessionId, phone, _) {
-            emit(AuthState.otpRequired(
-              sessionId: sessionId,
-              phone: phone,
-              otpResentAt: DateTime.now(),
-            ));
-          },
-          orElse: () {},
-        );
+        final currentState = state;
+        if (currentState is AuthOtpRequired) {
+          emit(AuthOtpRequired(
+            sessionId: currentState.sessionId,
+            phone: currentState.phone,
+            otpResentAt: DateTime.now(),
+          ));
+        }
       },
     );
   }
@@ -131,7 +126,7 @@ class AuthCubit extends Cubit<AuthState> {
     required String deviceId,
     required String deviceName,
   }) async {
-    emit(const AuthState.loading());
+    emit(AuthLoading());
 
     final request = DeviceVerificationRequest(
       deviceVerificationId: deviceVerificationId,
@@ -142,12 +137,12 @@ class AuthCubit extends Cubit<AuthState> {
     final result = await _repository.verifyDevice(request);
 
     result.fold(
-      (failure) => emit(AuthState.error(message: failure.message)),
+      (failure) => emit(AuthError(message: failure.message)),
       (response) {
         if (response.verified) {
           _handleSuccessfulAuth(response.tokens!, response.user!);
         } else {
-          emit(const AuthState.error(
+          emit(AuthError(
             message: 'فشل التحقق من الجهاز',
           ));
         }
@@ -170,7 +165,7 @@ class AuthCubit extends Cubit<AuthState> {
     // Reset logout flag
     _tokenManager.resetLogoutFlag();
 
-    emit(const AuthState.unauthenticated());
+    emit(AuthUnauthenticated());
   }
 
   /// Handle successful authentication
@@ -179,7 +174,7 @@ class AuthCubit extends Cubit<AuthState> {
     await _repository.saveTokens(tokens);
     await _repository.saveUser(user);
 
-    emit(AuthState.authenticated(user: user, tokens: tokens));
+    emit(AuthAuthenticated(user: user, tokens: tokens));
   }
 
   /// Handle notification deep link
@@ -189,24 +184,24 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> handleNotificationDeepLink(NotificationPayload payload) async {
     final currentState = state;
 
-    if (currentState is _Authenticated) {
+    if (currentState is AuthAuthenticated) {
       // User is authenticated, navigate immediately
-      emit(AuthState.authenticated(
+      emit(AuthAuthenticated(
         user: currentState.user,
         tokens: currentState.tokens,
         pendingNavigation: payload,
       ));
     } else {
       // User not authenticated, show login with pending navigation
-      emit(AuthState.unauthenticated(pendingNavigation: payload));
+      emit(AuthUnauthenticated(pendingNavigation: payload));
     }
   }
 
   /// Clear pending navigation after it's handled
   void clearPendingNavigation() {
     final currentState = state;
-    if (currentState is _Authenticated) {
-      emit(AuthState.authenticated(
+    if (currentState is AuthAuthenticated) {
+      emit(AuthAuthenticated(
         user: currentState.user,
         tokens: currentState.tokens,
       ));
@@ -215,43 +210,55 @@ class AuthCubit extends Cubit<AuthState> {
 }
 
 /// Authentication state
-@freezed
-class AuthState with _$AuthState {
-  /// Initial state
-  const factory AuthState.initial() = _Initial;
+abstract class AuthState {}
 
-  /// Checking authentication status
-  const factory AuthState.checking() = _Checking;
+/// Initial state
+class AuthInitial extends AuthState {}
 
-  /// Loading (login/verification in progress)
-  const factory AuthState.loading() = _Loading;
+/// Checking authentication status
+class AuthChecking extends AuthState {}
 
-  /// Unauthenticated - show login
-  const factory AuthState.unauthenticated({
-    NotificationPayload? pendingNavigation,
-  }) = _Unauthenticated;
+/// Loading (login/verification in progress)
+class AuthLoading extends AuthState {}
 
-  /// OTP required
-  const factory AuthState.otpRequired({
-    required String sessionId,
-    required String phone,
-    DateTime? otpResentAt,
-  }) = _OtpRequired;
+/// Unauthenticated - show login
+class AuthUnauthenticated extends AuthState {
+  final NotificationPayload? pendingNavigation;
+  AuthUnauthenticated({this.pendingNavigation});
+}
 
-  /// Device verification required
-  const factory AuthState.deviceVerificationRequired({
-    required String deviceVerificationId,
-  }) = _DeviceVerificationRequired;
+/// OTP required
+class AuthOtpRequired extends AuthState {
+  final String sessionId;
+  final String phone;
+  final DateTime? otpResentAt;
+  AuthOtpRequired({
+    required this.sessionId,
+    required this.phone,
+    this.otpResentAt,
+  });
+}
 
-  /// Authenticated successfully
-  const factory AuthState.authenticated({
-    required AuthUser user,
-    required AuthTokens tokens,
-    NotificationPayload? pendingNavigation,
-  }) = _Authenticated;
+/// Device verification required
+class AuthDeviceVerificationRequired extends AuthState {
+  final String deviceVerificationId;
+  AuthDeviceVerificationRequired({required this.deviceVerificationId});
+}
 
-  /// Error
-  const factory AuthState.error({
-    required String message,
-  }) = _Error;
+/// Authenticated successfully
+class AuthAuthenticated extends AuthState {
+  final AuthUser user;
+  final AuthTokens tokens;
+  final NotificationPayload? pendingNavigation;
+  AuthAuthenticated({
+    required this.user,
+    required this.tokens,
+    this.pendingNavigation,
+  });
+}
+
+/// Error
+class AuthError extends AuthState {
+  final String message;
+  AuthError({required this.message});
 }

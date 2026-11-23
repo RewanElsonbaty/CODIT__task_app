@@ -26,45 +26,44 @@ class AuthWrapper extends StatelessWidget {
         _handleStateChanges(context, state);
       },
       builder: (context, state) {
-        return state.when(
-          initial: () => const SplashScreen(),
-          checking: () => const SplashScreen(),
-          loading: () => _buildLoadingScreen(),
-          unauthenticated: (pendingNav) => const LoginScreen(),
-          otpRequired: (sessionId, phone, _) => OtpScreen(
-            sessionId: sessionId,
-            phone: phone,
-          ),
-          deviceVerificationRequired: (verificationId) =>
-              DeviceVerificationScreen(
-            verificationId: verificationId,
-          ),
-          authenticated: (user, tokens, pendingNav) {
-            // Handle pending navigation from deep link
-            if (pendingNav != null) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                _handleDeepLink(context, pendingNav);
-              });
-            }
-            return home;
-          },
-          error: (message) => _buildErrorScreen(context, message),
-        );
+        if (state is AuthInitial || state is AuthChecking) {
+          return const SplashScreen();
+        } else if (state is AuthLoading) {
+          return _buildLoadingScreen();
+        } else if (state is AuthUnauthenticated) {
+          return const LoginScreen();
+        } else if (state is AuthOtpRequired) {
+          return OtpScreen(
+            sessionId: state.sessionId,
+            phone: state.phone,
+          );
+        } else if (state is AuthDeviceVerificationRequired) {
+          return DeviceVerificationScreen(
+            verificationId: state.deviceVerificationId,
+          );
+        } else if (state is AuthAuthenticated) {
+          // Handle pending navigation from deep link
+          if (state.pendingNavigation != null) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _handleDeepLink(context, state.pendingNavigation!);
+            });
+          }
+          return home;
+        } else if (state is AuthError) {
+          return _buildErrorScreen(context, state.message);
+        }
+        return const SplashScreen();
       },
     );
   }
 
   /// Handle state changes (errors, success messages, etc.)
   void _handleStateChanges(BuildContext context, AuthState state) {
-    state.maybeWhen(
-      error: (message) {
-        _showErrorSnackBar(context, message);
-      },
-      authenticated: (user, tokens, pendingNav) {
-        _showSuccessSnackBar(context, 'تم تسجيل الدخول بنجاح');
-      },
-      orElse: () {},
-    );
+    if (state is AuthError) {
+      _showErrorSnackBar(context, state.message);
+    } else if (state is AuthAuthenticated) {
+      _showSuccessSnackBar(context, 'تم تسجيل الدخول بنجاح');
+    }
   }
 
   /// Handle deep link navigation from notifications

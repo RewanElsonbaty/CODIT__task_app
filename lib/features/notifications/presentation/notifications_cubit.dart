@@ -1,12 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 import '../domain/notification_models.dart';
-
-part 'notifications_cubit.freezed.dart';
 
 /// Notifications Cubit
 class NotificationsCubit extends Cubit<NotificationsState> {
-  NotificationsCubit() : super(const NotificationsState.loading()) {
+  NotificationsCubit() : super(NotificationsLoading()) {
     _loadNotifications();
   }
 
@@ -18,12 +15,12 @@ class NotificationsCubit extends Cubit<NotificationsState> {
       // Mock data - replace with actual API call
       final notifications = _generateMockNotifications();
       
-      emit(NotificationsState.loaded(
+      emit(NotificationsLoaded(
         notifications: notifications,
         filter: NotificationFilter.all,
       ));
     } catch (e) {
-      emit(NotificationsState.error(message: e.toString()));
+      emit(NotificationsError(message: e.toString()));
     }
   }
 
@@ -216,16 +213,30 @@ class NotificationsCubit extends Cubit<NotificationsState> {
 }
 
 /// Notifications State
-@freezed
-class NotificationsState with _$NotificationsState {
-  const factory NotificationsState.loading() = NotificationsLoading;
-  
-  const factory NotificationsState.loaded({
-    required List<AppNotification> notifications,
-    required NotificationFilter filter,
-  }) = NotificationsLoaded;
-  
-  const factory NotificationsState.error({
-    required String message,
-  }) = NotificationsError;
+abstract class NotificationsState {}
+
+class NotificationsLoading extends NotificationsState {}
+
+class NotificationsLoaded extends NotificationsState {
+  final List<AppNotification> notifications;
+  final NotificationFilter filter;
+  NotificationsLoaded({
+    required this.notifications,
+    required this.filter,
+  });
+
+  NotificationsLoaded copyWith({
+    List<AppNotification>? notifications,
+    NotificationFilter? filter,
+  }) {
+    return NotificationsLoaded(
+      notifications: notifications ?? this.notifications,
+      filter: filter ?? this.filter,
+    );
+  }
+}
+
+class NotificationsError extends NotificationsState {
+  final String message;
+  NotificationsError({required this.message});
 }

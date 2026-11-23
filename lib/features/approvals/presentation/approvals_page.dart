@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/shimmer_loading.dart';
 import 'approvals_cubit.dart';
+import 'approval_details_screen.dart';
 
 class ApprovalsPage extends StatelessWidget {
   const ApprovalsPage({super.key});
@@ -55,6 +57,25 @@ class _ApprovalsPageContent extends StatelessWidget {
           ],
         ),
         actions: [
+          // مؤشر الكاش
+          BlocBuilder<ApprovalsCubit, ApprovalsState>(
+            builder: (context, state) {
+              if (state is ApprovalsLoaded && state.isFromCache) {
+                return Padding(
+                  padding: const EdgeInsets.only(left: 8),
+                  child: Tooltip(
+                    message: 'البيانات من الذاكرة المؤقتة',
+                    child: Icon(
+                      Icons.cloud_off,
+                      color: Colors.orange[300],
+                      size: 20,
+                    ),
+                  ),
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
           // زر الرجوع للصفحة الرئيسية
           IconButton(
             icon: const Icon(Icons.home, color: AppColors.goldenNeon),
@@ -66,13 +87,41 @@ class _ApprovalsPageContent extends StatelessWidget {
       ),
       body: BlocBuilder<ApprovalsCubit, ApprovalsState>(
         builder: (context, state) {
-          return state.when(
-            loading: () => const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
-            ),
-            loaded: (approvals, selectedFilter) {
-              final cubit = context.read<ApprovalsCubit>();
-              final filteredApprovals = cubit.getFilteredApprovals();
+          if (state is ApprovalsLoading) {
+            return const ShimmerApprovalsList();
+          }
+          
+          if (state is ApprovalsError) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error, size: 64, color: AppColors.errorLight),
+                  const SizedBox(height: 16),
+                  Text(
+                    'حدث خطأ: ${state.message}',
+                    style: const TextStyle(color: AppColors.errorLight),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton.icon(
+                    onPressed: state.onRetry ?? () => context.read<ApprovalsCubit>().loadApprovals(),
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('إعادة المحاولة'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.goldenNeon,
+                      foregroundColor: Colors.black,
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+          
+          if (state is ApprovalsLoaded) {
+            final cubit = context.read<ApprovalsCubit>();
+            final filteredApprovals = cubit.getFilteredApprovals();
 
               return Column(
                 children: [
@@ -84,13 +133,13 @@ class _ApprovalsPageContent extends StatelessWidget {
                       scrollDirection: Axis.horizontal,
                       child: Row(
                         children: [
-                          _buildFilterChip(context, 'الكل', selectedFilter),
+                          _buildFilterChip(context, 'الكل', state.selectedFilter),
                           const SizedBox(width: 8),
-                          _buildFilterChip(context, 'قيد الانتظار', selectedFilter),
+                          _buildFilterChip(context, 'قيد الانتظار', state.selectedFilter),
                           const SizedBox(width: 8),
-                          _buildFilterChip(context, 'موافق عليها', selectedFilter),
+                          _buildFilterChip(context, 'موافق عليها', state.selectedFilter),
                           const SizedBox(width: 8),
-                          _buildFilterChip(context, 'مرفوضة', selectedFilter),
+                          _buildFilterChip(context, 'مرفوضة', state.selectedFilter),
                         ],
                       ),
                     ),
@@ -134,26 +183,9 @@ class _ApprovalsPageContent extends StatelessWidget {
                   ),
                 ],
               );
-            },
-            error: (message) => Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error, size: 64, color: AppColors.errorLight),
-                  const SizedBox(height: 16),
-                  Text(
-                    'حدث خطأ: $message',
-                    style: const TextStyle(color: AppColors.errorLight),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () => context.read<ApprovalsCubit>().loadApprovals(),
-                    child: const Text('إعادة المحاولة'),
-                  ),
-                ],
-              ),
-            ),
-          );
+            }
+          
+          return const SizedBox();
         },
       ),
     );
@@ -227,7 +259,19 @@ class _ApprovalsPageContent extends StatelessWidget {
         side: BorderSide(color: Colors.grey[800]!, width: 1),
       ),
       child: InkWell(
-        onTap: () => context.go('/approvals/${approval['id']}'),
+        onTap: () async {
+          // Navigate with full approval data
+          final result = await Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => ApprovalDetailsScreen(request: approval),
+            ),
+          );
+          
+          // Reload if approval was updated
+          if (result == true && context.mounted) {
+            context.read<ApprovalsCubit>().loadApprovals();
+          }
+        },
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16),

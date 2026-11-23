@@ -69,14 +69,18 @@ class _BranchDashboardView extends StatelessWidget {
       ),
       body: BlocBuilder<BranchDashboardCubit, BranchDashboardState>(
         builder: (context, state) {
-          return state.when(
-            loading: () => _buildLoadingState(),
-            loaded: (summary) => _buildLoadedState(context, summary, false),
-            offline: (summary, lastUpdate) =>
-                _buildLoadedState(context, summary, true, lastUpdate),
-            error: (message) => _buildErrorState(context, message),
-            empty: () => _buildEmptyState(),
-          );
+          if (state is BranchDashboardLoading) {
+            return _buildLoadingState();
+          } else if (state is BranchDashboardLoaded) {
+            return _buildLoadedState(context, state.summary, false);
+          } else if (state is BranchDashboardOffline) {
+            return _buildLoadedState(context, state.summary, true, state.lastUpdate);
+          } else if (state is BranchDashboardError) {
+            return _buildErrorState(context, state.message);
+          } else if (state is BranchDashboardEmpty) {
+            return _buildEmptyState();
+          }
+          return const SizedBox.shrink();
         },
       ),
     );

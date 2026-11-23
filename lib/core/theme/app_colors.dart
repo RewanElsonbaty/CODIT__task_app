@@ -13,6 +13,9 @@ abstract final class AppColors {
   /// خلفية الكروت - Dark Charcoal
   static const card = Color(0xFF292421);
   
+  /// خلفية الكروت عند Hover - Lighter Charcoal
+  static const cardHover = Color(0xFF3A3532);
+  
   /// الخلفية الثانوية - Dark Brown
   static const backgroundSecondary = Color(0xFF211D1B);
   

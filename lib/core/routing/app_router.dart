@@ -6,6 +6,7 @@ import 'package:codit/features/authentication/presentation/otp_page.dart';
 import 'package:codit/features/gold_sales/presentation/gold_sale_page.dart';
 import 'package:codit/features/notifications/presentation/pages/notifications_page.dart';
 import 'package:codit/features/approvals/presentation/approvals_page.dart';
+import 'package:codit/features/approvals/presentation/approval_details_screen.dart';
 import 'package:codit/features/installments/presentation/installments_simple_page.dart';
 import 'package:codit/features/branches/presentation/branches_simple_page.dart';
 import 'package:codit/core/widgets/font_test_widget.dart';
@@ -52,8 +53,9 @@ GoRouter buildRouter(AuthenticationCubit authCubit) {
 
       if (!session.isAuthenticated) {
         if (session.step == AuthStep.otp && loc != '/otp') return '/otp';
-        if (session.step == AuthStep.device && loc != '/device')
+        if (session.step == AuthStep.device && loc != '/device') {
           return '/device';
+        }
         if (!isAuthRoute) return '/login';
         return null;
       }
@@ -84,10 +86,26 @@ GoRouter buildRouter(AuthenticationCubit authCubit) {
       ),
       GoRoute(
         path: '/approvals/:id',
-        builder: (_, state) => _PlaceholderPage(
-          title: 'Approval Details',
-          subtitle: 'ID: ${state.pathParameters['id']}',
-        ),
+        builder: (_, state) {
+          final id = state.pathParameters['id'];
+          // في الواقع، يجب جلب التفاصيل من API
+          // لكن للتبسيط، سنمرر placeholder
+          return ApprovalDetailsScreen(
+            request: {
+              'id': id,
+              'title': 'Loading...',
+              'description': 'Loading details...',
+              'type': 'discount',
+              'status': 'pending',
+              'priority': 'medium',
+              'requester_name': 'Loading...',
+              'created_at': DateTime.now().toIso8601String(),
+              'version': 1,
+              'metadata': {},
+              'approvers': [],
+            },
+          );
+        },
       ),
 
       // Installments
@@ -126,7 +144,16 @@ class _HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('CODIT Gold Shop')),
+      appBar: AppBar(
+        title: const Text('CODIT Gold Shop'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications),
+            onPressed: () => context.go('/notifications'),
+            tooltip: 'الإشعارات',
+          ),
+        ],
+      ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -154,6 +181,11 @@ class _HomePage extends StatelessWidget {
             ElevatedButton(
               onPressed: () => context.go('/branches'),
               child: const Text('Branch Monitoring'),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => context.go('/notifications'),
+              child: const Text('Notifications'),
             ),
           ],
         ),

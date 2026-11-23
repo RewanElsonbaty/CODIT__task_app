@@ -1,4 +1,6 @@
 import 'package:codit/core/config/app_config.dart';
+import 'package:codit/core/cache/cache_manager.dart';
+import 'package:codit/core/data/mock_gold_sales_api.dart';
 import 'package:codit/core/database/app_database.dart';
 import 'package:codit/core/network/api_client.dart';
 import 'package:codit/core/network/network_info.dart';
@@ -14,8 +16,6 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:get_it/get_it.dart';
 
 final getIt = GetIt.instance;
-
-const _defaultAccount = 'shop-a';
 
 /// Configure core dependencies
 ///
@@ -43,6 +43,12 @@ Future<void> configureDependencies() async {
   // Network
   getIt.registerSingleton<NetworkInfo>(NetworkInfoImpl(Connectivity()));
   getIt.registerSingleton<IdGenerator>(IdGenerator());
+
+  // Cache Manager
+  getIt.registerSingleton<CacheManager>(CacheManager());
+
+  // Mock Gold Sales API
+  getIt.registerSingleton<MockGoldSalesApi>(MockGoldSalesApi());
 
   late AuthenticationCubit authCubit;
 

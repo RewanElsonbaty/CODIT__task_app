@@ -227,10 +227,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     // Login button
                     BlocBuilder<AuthCubit, AuthState>(
                       builder: (context, state) {
-                        final isLoading = state.maybeWhen(
-                          loading: () => true,
-                          orElse: () => false,
-                        );
+                        final isLoading = state is AuthLoading;
 
                         return SizedBox(
                           width: double.infinity,
@@ -403,28 +400,62 @@ class _LoginScreenState extends State<LoginScreen> {
 
   String? _validatePhone(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Phone number is required';
+      return 'رقم الهاتف مطلوب';
     }
-    if (value.length < 10) {
-      return 'Invalid phone number';
+    
+    // إزالة المسافات والرموز
+    final cleanPhone = value.replaceAll(RegExp(r'[^\d+]'), '');
+    
+    // التحقق من طول الرقم (10-15 رقم)
+    if (cleanPhone.length < 10) {
+      return 'رقم الهاتف قصير جداً (على الأقل 10 أرقام)';
     }
+    
+    if (cleanPhone.length > 15) {
+      return 'رقم الهاتف طويل جداً (حد أقصى 15 رقم)';
+    }
+    
+    // التحقق من أن الأرقام صحيحة
+    if (!RegExp(r'^\+?\d{10,15}$').hasMatch(cleanPhone)) {
+      return 'رقم الهاتف غير صحيح';
+    }
+    
     return null;
   }
 
   String? _validatePassword(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Password is required';
+      return 'كلمة المرور مطلوبة';
     }
+    
     if (value.length < 6) {
-      return 'Password must be at least 6 characters';
+      return 'كلمة المرور قصيرة جداً (على الأقل 6 أحرف)';
     }
+    
+    if (value.length > 50) {
+      return 'كلمة المرور طويلة جداً (حد أقصى 50 حرف)';
+    }
+    
+    // التحقق من وجود حرف واحد على الأقل
+    if (!RegExp(r'[a-zA-Z]').hasMatch(value)) {
+      return 'يجب أن تحتوي على حرف واحد على الأقل';
+    }
+    
+    // التحقق من وجود رقم واحد على الأقل
+    if (!RegExp(r'\d').hasMatch(value)) {
+      return 'يجب أن تحتوي على رقم واحد على الأقل';
+    }
+    
     return null;
   }
 
   void _handleLogin() {
     if (_formKey.currentState!.validate()) {
+      // تنظيف رقم الهاتف
+      final cleanPhone = _phoneController.text.replaceAll(RegExp(r'[^\d+]'), '');
+      
       context.read<AuthCubit>().login(
-            phone: _phoneController.text.trim(),
+            phone: cleanPhone,
             password: _passwordController.text,
             deviceId: 'device_123', // TODO: Get actual device ID
             deviceName: 'Android Device', // TODO: Get actual device name

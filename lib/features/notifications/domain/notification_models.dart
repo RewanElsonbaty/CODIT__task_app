@@ -1,56 +1,139 @@
 import 'package:flutter/material.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
-
-part 'notification_models.freezed.dart';
-part 'notification_models.g.dart';
 
 /// Notification model
-@freezed
-class AppNotification with _$AppNotification {
-  const factory AppNotification({
-    required String id,
-    required String title,
-    required String body,
-    required NotificationType type,
-    required DateTime timestamp,
-    @Default(false) bool isRead,
+class AppNotification {
+  final String id;
+  final String title;
+  final String body;
+  final NotificationType type;
+  final DateTime timestamp;
+  final bool isRead;
+  final Map<String, dynamic>? data;
+  final String? imageUrl;
+  final String? actionUrl;
+
+  const AppNotification({
+    required this.id,
+    required this.title,
+    required this.body,
+    required this.type,
+    required this.timestamp,
+    this.isRead = false,
+    this.data,
+    this.imageUrl,
+    this.actionUrl,
+  });
+
+  AppNotification copyWith({
+    String? id,
+    String? title,
+    String? body,
+    NotificationType? type,
+    DateTime? timestamp,
+    bool? isRead,
     Map<String, dynamic>? data,
     String? imageUrl,
     String? actionUrl,
-  }) = _AppNotification;
+  }) {
+    return AppNotification(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      body: body ?? this.body,
+      type: type ?? this.type,
+      timestamp: timestamp ?? this.timestamp,
+      isRead: isRead ?? this.isRead,
+      data: data ?? this.data,
+      imageUrl: imageUrl ?? this.imageUrl,
+      actionUrl: actionUrl ?? this.actionUrl,
+    );
+  }
 
-  factory AppNotification.fromJson(Map<String, dynamic> json) =>
-      _$AppNotificationFromJson(json);
+  factory AppNotification.fromJson(Map<String, dynamic> json) {
+    return AppNotification(
+      id: json['id'] as String,
+      title: json['title'] as String,
+      body: json['body'] as String,
+      type: NotificationType.fromJsonValue(json['type'] as String),
+      timestamp: DateTime.parse(json['timestamp'] as String),
+      isRead: json['isRead'] as bool? ?? false,
+      data: json['data'] as Map<String, dynamic>?,
+      imageUrl: json['imageUrl'] as String?,
+      actionUrl: json['actionUrl'] as String?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'body': body,
+      'type': type.toJsonValue(),
+      'timestamp': timestamp.toIso8601String(),
+      'isRead': isRead,
+      'data': data,
+      'imageUrl': imageUrl,
+      'actionUrl': actionUrl,
+    };
+  }
 }
 
 /// Notification types
 enum NotificationType {
-  @JsonValue('approval_request')
   approvalRequest,
-
-  @JsonValue('approval_response')
   approvalResponse,
-
-  @JsonValue('sale_completed')
   saleCompleted,
-
-  @JsonValue('installment_due')
   installmentDue,
-
-  @JsonValue('installment_collected')
   installmentCollected,
-
-  @JsonValue('price_update')
   priceUpdate,
-
-  @JsonValue('branch_alert')
   branchAlert,
-
-  @JsonValue('system_alert')
   systemAlert,
-
-  @JsonValue('general')
   general;
+
+  String toJsonValue() {
+    switch (this) {
+      case NotificationType.approvalRequest:
+        return 'approval_request';
+      case NotificationType.approvalResponse:
+        return 'approval_response';
+      case NotificationType.saleCompleted:
+        return 'sale_completed';
+      case NotificationType.installmentDue:
+        return 'installment_due';
+      case NotificationType.installmentCollected:
+        return 'installment_collected';
+      case NotificationType.priceUpdate:
+        return 'price_update';
+      case NotificationType.branchAlert:
+        return 'branch_alert';
+      case NotificationType.systemAlert:
+        return 'system_alert';
+      case NotificationType.general:
+        return 'general';
+    }
+  }
+
+  static NotificationType fromJsonValue(String value) {
+    switch (value) {
+      case 'approval_request':
+        return NotificationType.approvalRequest;
+      case 'approval_response':
+        return NotificationType.approvalResponse;
+      case 'sale_completed':
+        return NotificationType.saleCompleted;
+      case 'installment_due':
+        return NotificationType.installmentDue;
+      case 'installment_collected':
+        return NotificationType.installmentCollected;
+      case 'price_update':
+        return NotificationType.priceUpdate;
+      case 'branch_alert':
+        return NotificationType.branchAlert;
+      case 'system_alert':
+        return NotificationType.systemAlert;
+      default:
+        return NotificationType.general;
+    }
+  }
 
   String get label {
     switch (this) {

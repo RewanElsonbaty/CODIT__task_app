@@ -3,13 +3,69 @@ import 'package:equatable/equatable.dart';
 import 'package:uuid/uuid.dart';
 import '../domain/gold_models.dart';
 import '../domain/gold_calculator.dart';
+import '../../../core/data/mock_gold_sales_api.dart';
 
 part 'gold_sale_state.dart';
 
 class GoldSaleCubit extends Cubit<GoldSaleState> {
-  GoldSaleCubit() : super(GoldSaleInitial());
+  final MockGoldSalesApi _api;
+  
+  GoldSaleCubit(this._api) : super(GoldSaleInitial());
   
   final _uuid = const Uuid();
+  
+  /// جلب جميع المنتجات من الـ API
+  Future<void> loadProducts({
+    Karat? karat,
+  }) async {
+    try {
+      final result = await _api.getAllProducts(
+        karat: karat,
+      );
+      
+      if (result['success'] == true) {
+        final data = result['data'] as Map<String, dynamic>;
+        final products = (data['products'] as List)
+            .map((json) => GoldProduct.fromJson(json))
+            .toList();
+        
+        emit(ProductsLoaded(products: products));
+      } else {
+        emit(GoldSaleError(message: result['error'] ?? 'فشل تحميل المنتجات'));
+      }
+    } catch (e) {
+      emit(GoldSaleError(message: 'خطأ في الاتصال بالخادم'));
+    }
+  }
+  
+  /// البحث عن منتج بالكود أو الباركود
+  Future<GoldProduct?> searchProduct({
+    String? code,
+    String? barcode,
+  }) async {
+    try {
+      final result = await _api.searchProduct(
+        code: code,
+        barcode: barcode,
+      );
+      
+      if (result['success'] == true) {
+        final data = result['data'] as Map<String, dynamic>;
+        return GoldProduct.fromJson(data);
+      } else {
+        emit(GoldSaleError(message: result['error'] ?? 'المنتج غير موجود'));
+        await Future.delayed(const Duration(seconds: 2));
+        final current = state;
+        if (current is InvoiceBuilding) {
+          emit(current);
+        }
+        return null;
+      }
+    } catch (e) {
+      emit(GoldSaleError(message: 'خطأ في البحث عن المنتج'));
+      return null;
+    }
+  }
   
   /// بدء فاتورة جديدة
   void startNew() {
@@ -307,12 +363,29 @@ class GoldSaleCubit extends Cubit<GoldSaleState> {
     
     emit(InvoiceSaving(invoice: current.invoice));
     
-    // TODO: Save to local storage
-    await Future.delayed(const Duration(seconds: 1));
-    
-    emit(InvoiceSaved(invoice: current.invoice));
-    await Future.delayed(const Duration(seconds: 1));
-    emit(current);
+    try {
+      final result = await _api.saveDraft(current.invoice);
+      
+      if (result['success'] == true) {
+        emit(InvoiceSaved(invoice: current.invoice));
+        await Future.delayed(const Duration(seconds: 1));
+        emit(current);
+      } else {
+        emit(InvoiceError(
+          message: result['error'] ?? 'فشل حفظ المسودة',
+          invoice: current.invoice,
+        ));
+        await Future.delayed(const Duration(seconds: 2));
+        emit(current);
+      }
+    } catch (e) {
+      emit(InvoiceError(
+        message: 'خطأ في حفظ المسودة',
+        invoice: current.invoice,
+      ));
+      await Future.delayed(const Duration(seconds: 2));
+      emit(current);
+    }
   }
   
   /// إتمام البيع
@@ -350,15 +423,32 @@ class GoldSaleCubit extends Cubit<GoldSaleState> {
     
     emit(InvoiceSubmitting(invoice: current.invoice));
     
-    // TODO: Submit to API
-    await Future.delayed(const Duration(seconds: 2));
-    
-    final completedInvoice = current.invoice.copyWith(
-      isDraft: false,
-      isComplete: true,
-    );
-    
-    emit(InvoiceCompleted(invoice: completedInvoice));
+    try {
+      final result = await _api.createInvoice(current.invoice);
+      
+      if (result['success'] == true) {
+        final completedInvoice = current.invoice.copyWith(
+          isDraft: false,
+          isComplete: true,
+        );
+        
+        emit(InvoiceCompleted(invoice: completedInvoice));
+      } else {
+        emit(InvoiceError(
+          message: result['error'] ?? 'فشل إتمام البيع',
+          invoice: current.invoice,
+        ));
+        await Future.delayed(const Duration(seconds: 2));
+        emit(current);
+      }
+    } catch (e) {
+      emit(InvoiceError(
+        message: 'خطأ في إتمام البيع',
+        invoice: current.invoice,
+      ));
+      await Future.delayed(const Duration(seconds: 2));
+      emit(current);
+    }
   }
   
   /// إعادة الحساب الكاملة للفاتورة

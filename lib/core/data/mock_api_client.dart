@@ -72,6 +72,22 @@ class MockApiClient {
     };
   }
 
+  /// تنفيذ طلب PATCH
+  Future<Map<String, dynamic>> patch(
+    String endpoint, {
+    Map<String, dynamic>? body,
+    bool canFail = false,
+  }) async {
+    await _simulateNetworkDelay();
+    if (canFail) _simulateRandomNetworkError();
+
+    return {
+      'success': true,
+      'timestamp': DateTime.now().toIso8601String(),
+      'data': body,
+    };
+  }
+
   /// تنفيذ طلب DELETE
   Future<Map<String, dynamic>> delete(
     String endpoint, {

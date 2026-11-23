@@ -1,30 +1,31 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 import '../data/mock_installments_api.dart';
-
-part 'installments_list_cubit.freezed.dart';
 
 class InstallmentsListCubit extends Cubit<InstallmentsListState> {
   final MockInstallmentsApi _api = MockInstallmentsApi();
 
-  InstallmentsListCubit() : super(const InstallmentsListState.loading()) {
+  InstallmentsListCubit() : super(InstallmentsListLoading()) {
     loadInstallments();
   }
 
   Future<void> loadInstallments() async {
     try {
-      emit(const InstallmentsListState.loading());
+      emit(InstallmentsListLoading());
       
       await Future.delayed(const Duration(milliseconds: 500));
       
       final installments = await _api.getCustomers();
       
-      emit(InstallmentsListState.loaded(
+      emit(InstallmentsListLoaded(
         installments: installments,
         selectedFilter: 'الكل',
       ));
     } catch (e) {
-      emit(InstallmentsListState.error(message: e.toString()));
+      emit(InstallmentsListError(
+        message: e.toString(),
+        onRetry: loadInstallments,
+      ));
     }
   }
 
@@ -32,7 +33,10 @@ class InstallmentsListCubit extends Cubit<InstallmentsListState> {
     final currentState = state;
     if (currentState is! InstallmentsListLoaded) return;
 
-    emit(currentState.copyWith(selectedFilter: filter));
+    emit(InstallmentsListLoaded(
+      installments: currentState.installments,
+      selectedFilter: filter,
+    ));
   }
 
   List<Map<String, dynamic>> getFilteredInstallments() {
@@ -94,14 +98,27 @@ class InstallmentsListCubit extends Cubit<InstallmentsListState> {
   }
 }
 
-@freezed
-class InstallmentsListState with _$InstallmentsListState {
-  const factory InstallmentsListState.loading() = InstallmentsListLoading;
-  
-  const factory InstallmentsListState.loaded({
-    required List<Map<String, dynamic>> installments,
-    required String selectedFilter,
-  }) = InstallmentsListLoaded;
-  
-  const factory InstallmentsListState.error({required String message}) = InstallmentsListError;
+// States without Freezed
+abstract class InstallmentsListState {}
+
+class InstallmentsListLoading extends InstallmentsListState {}
+
+class InstallmentsListLoaded extends InstallmentsListState {
+  final List<Map<String, dynamic>> installments;
+  final String selectedFilter;
+
+  InstallmentsListLoaded({
+    required this.installments,
+    required this.selectedFilter,
+  });
+}
+
+class InstallmentsListError extends InstallmentsListState {
+  final String message;
+  final VoidCallback? onRetry;
+
+  InstallmentsListError({
+    required this.message,
+    this.onRetry,
+  });
 }

@@ -10,6 +10,26 @@ sealed class GoldSaleState extends Equatable {
 /// حالة أولية
 class GoldSaleInitial extends GoldSaleState {}
 
+/// تم تحميل المنتجات
+class ProductsLoaded extends GoldSaleState {
+  final List<GoldProduct> products;
+  
+  const ProductsLoaded({required this.products});
+  
+  @override
+  List<Object?> get props => [products];
+}
+
+/// خطأ عام
+class GoldSaleError extends GoldSaleState {
+  final String message;
+  
+  const GoldSaleError({required this.message});
+  
+  @override
+  List<Object?> get props => [message];
+}
+
 /// جاري بناء الفاتورة
 class InvoiceBuilding extends GoldSaleState {
   final GoldInvoice invoice;

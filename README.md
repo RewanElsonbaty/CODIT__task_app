@@ -1,31 +1,148 @@
 # 💎 CODIT Gold Shop Management System
 
-نظام إدارة متكامل لمحلات الذهب الفاخرة يدعم 5 وحدات أساسية:
-- 🔐 **Authentication** - المصادقة وإدارة الصلاحيات
-- 💰 **Gold POS** - نقاط البيع والفواتير
-- 📝 **Installments** - إدارة الأقساط والعملاء
-- ✅ **Approvals** - نظام الموافقات متعدد المستويات
-- 📊 **Branch Monitoring** - مراقبة الفروع في الوقت الفعلي
+نظام إدارة متكامل لمحلات الذهب الفاخرة مع Clean Architecture وBLoC Pattern
+
+<div align="center">
+
+![Flutter](https://img.shields.io/badge/Flutter-3.50.0-02569B?logo=flutter)
+![Dart](https://img.shields.io/badge/Dart-3.14.0-0175C2?logo=dart)
+![Tests](https://img.shields.io/badge/Tests-62%20passed-success)
+![Errors](https://img.shields.io/badge/Errors-0-success)
+![Architecture](https://img.shields.io/badge/Architecture-Clean-blue)
+![State Management](https://img.shields.io/badge/State%20Management-BLoC-purple)
+![License](https://img.shields.io/badge/License-MIT-green)
+
+</div>
 
 ---
 
-## ✨ Features
+## 🌟 الميزات الرئيسية
 
-### 🎯 Core Features
-- ✅ **Integer Math Engine** - دقة رياضية 100% في الحسابات المالية
-- ✅ **Responsive Design** - دعم Mobile و Tablet و Desktop
-- ✅ **Arabic RTL** - دعم كامل للغة العربية من اليمين لليسار
-- ✅ **Luxury Gold Theme** - تصميم فاخر بألوان ذهبية
-- ✅ **Mock APIs** - بيئة تطوير كاملة بدون Backend
-- ✅ **Comprehensive Tests** - 57+ اختبار حرج
+### 🔐 المصادقة (Authentication)
+- ✅ تسجيل دخول بالهاتف وكلمة المرور
+- ✅ OTP Verification
+- ✅ تسجيل الأجهزة (Device Registration)
+- ✅ إدارة الجلسات (Session Management)
+- ✅ Secure Storage للبيانات الحساسة
 
-### 💎 Gold POS Highlights
-- حساب دقيق للأوزان والأسعار بدون أخطاء فاصلة عشرية
-- دعم عيارات متعددة (24, 21, 18)
-- إضافة بدل (Trade-in)
-- طرق دفع متعددة (Cash, Card, Transfer, Check)
-- حفظ مسودات الفواتير
-- فواتير متعددة الأصناف
+### 💰 بيع الذهب (Gold Sales POS)
+- ✅ واجهة POS تفاعلية مع دعم RTL كامل
+- ✅ حساب السعر التلقائي حسب العيار والوزن
+- ✅ دعم عيارات متعددة (24، 21، 18)
+- ✅ دعم أوزان متعددة (جرام، أونصة، كيلو)
+- ✅ معاينة الفاتورة قبل الحفظ
+- ✅ حساب دقيق للمبالغ
+
+### ✅ الموافقات (Approvals)
+- ✅ قائمة الموافقات المعلقة
+- ✅ فلترة حسب الحالة (معلق، موافق، مرفوض)
+- ✅ Shimmer Loading للتجربة الأفضل
+- ✅ Offline Caching مع TTL
+- ✅ Pull to Refresh
+
+### 📝 الأقساط (Installments)
+- ✅ قائمة العملاء مع الأقساط
+- ✅ فلترة حسب الحالة (نشط، متأخر، مكتمل)
+- ✅ حساب إجمالي الديون
+- ✅ عرض عدد الأقساط النشطة والمتأخرة
+- ✅ Shimmer Loading
+
+### 📊 الفروع (Branches Monitoring)
+- ✅ قائمة الفروع مع معلومات تفصيلية
+- ✅ مبيعات اليوم والإحصائيات
+- ✅ عدد الموظفين النشطين
+- ✅ حالة الفرع (نشط/مغلق)
+- ✅ Shimmer Loading
+
+### 🎨 التحسينات الإضافية
+- ✅ **Shimmer Loading** - 6 widgets مخصصة
+- ✅ **Offline Caching** - CacheManager مع SecureStorage
+- ✅ **Forms Validation** - Regex للهاتف وكلمة المرور
+- ✅ **Unit Tests** - 62 اختبار شامل
+- ✅ **RTL Support** - دعم كامل للعربية
+- ✅ **Error Handling** - معالجة شاملة للأخطاء
+
+---
+
+## 🏗️ البنية المعمارية
+
+```
+Clean Architecture
+├── Presentation Layer (UI + State Management - Cubits)
+├── Domain Layer (Business Logic - Models + Calculator)
+└── Data Layer (Mock APIs + Storage)
+
+State Management: BLoC Pattern (Cubits)
+Dependency Injection: GetIt
+Routing: GoRouter
+Storage: Secure Storage + Shared Preferences
+```
+
+---
+
+## 📊 الإحصائيات
+
+| المجال | العدد |
+|-------|-------|
+| **الملفات** | 160+ |
+| **السطور** | ~19,500 |
+| **الميزات** | 10+ |
+| **الاختبارات** | 62 |
+| **الأخطاء** | 0 |
+| **Mock APIs** | 9 |
+
+---
+
+## 🚀 البدء السريع
+
+### المتطلبات:
+- Flutter 3.50.0+
+- Dart 3.14.0+
+
+### التثبيت:
+
+```bash
+# 1. استنساخ المشروع
+git clone https://github.com/YOUR_USERNAME/CODIT-TASK.git
+cd CODIT-TASK
+
+# 2. تثبيت التبعيات
+flutter pub get
+
+# 3. تشغيل المشروع
+flutter run -d windows  # أو chrome أو android
+```
+
+### تسجيل الدخول:
+
+استخدم أحد المستخدمين التجريبيين:
+
+| البريد | كلمة المرور | الصلاحيات |
+|--------|-------------|-----------|
+| `admin@codit.gold` | `Admin@123` | جميع الصلاحيات |
+| `manager@codit.gold` | `Manager@123` | مدير فرع |
+| `cashier@codit.gold` | `Cashier@123` | كاشير |
+
+---
+
+## 🧪 تشغيل الاختبارات
+
+```bash
+# تشغيل جميع الاختبارات
+flutter test
+
+# تشغيل اختبار محدد
+flutter test test/features/approvals/approvals_cubit_test.dart
+
+# تحليل الكود
+flutter analyze
+```
+
+**النتيجة المتوقعة**: 62 اختبار ناجح ✅
+
+---
+
+## 📁 بنية المشروع
 
 ### 🔐 Authentication Features
 - تسجيل دخول آمن

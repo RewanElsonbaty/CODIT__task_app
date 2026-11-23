@@ -1,31 +1,32 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 import '../data/mock_branches_api.dart';
-
-part 'branches_cubit.freezed.dart';
 
 class BranchesCubit extends Cubit<BranchesState> {
   final MockBranchesApi _api = MockBranchesApi();
 
-  BranchesCubit() : super(const BranchesState.loading()) {
+  BranchesCubit() : super(BranchesLoading()) {
     loadBranches();
   }
 
   Future<void> loadBranches() async {
     try {
-      emit(const BranchesState.loading());
+      emit(BranchesLoading());
       
       await Future.delayed(const Duration(milliseconds: 500));
       
       final branches = await _api.getBranches();
       final stats = await _api.getTodayStatistics();
       
-      emit(BranchesState.loaded(
+      emit(BranchesLoaded(
         branches: branches,
         statistics: stats,
       ));
     } catch (e) {
-      emit(BranchesState.error(message: e.toString()));
+      emit(BranchesError(
+        message: e.toString(),
+        onRetry: loadBranches,
+      ));
     }
   }
 
@@ -41,7 +42,10 @@ class BranchesCubit extends Cubit<BranchesState> {
       
       await loadBranches();
     } catch (e) {
-      emit(BranchesState.error(message: e.toString()));
+      emit(BranchesError(
+        message: e.toString(),
+        onRetry: refreshBranches,
+      ));
     }
   }
 
@@ -73,14 +77,27 @@ class BranchesCubit extends Cubit<BranchesState> {
   }
 }
 
-@freezed
-class BranchesState with _$BranchesState {
-  const factory BranchesState.loading() = BranchesLoading;
-  
-  const factory BranchesState.loaded({
-    required List<Map<String, dynamic>> branches,
-    required Map<String, dynamic> statistics,
-  }) = BranchesLoaded;
-  
-  const factory BranchesState.error({required String message}) = BranchesError;
+// States without Freezed
+abstract class BranchesState {}
+
+class BranchesLoading extends BranchesState {}
+
+class BranchesLoaded extends BranchesState {
+  final List<Map<String, dynamic>> branches;
+  final Map<String, dynamic> statistics;
+
+  BranchesLoaded({
+    required this.branches,
+    required this.statistics,
+  });
+}
+
+class BranchesError extends BranchesState {
+  final String message;
+  final VoidCallback? onRetry;
+
+  BranchesError({
+    required this.message,
+    this.onRetry,
+  });
 }

@@ -124,10 +124,7 @@ class _OtpScreenState extends State<OtpScreen> {
                   // Verify button
                   BlocBuilder<AuthCubit, AuthState>(
                     builder: (context, state) {
-                      final isLoading = state.maybeWhen(
-                        loading: () => true,
-                        orElse: () => false,
-                      );
+                      final isLoading = state is AuthLoading;
 
                       return SizedBox(
                         width: double.infinity,
@@ -300,24 +297,19 @@ class _OtpScreenState extends State<OtpScreen> {
     return BlocListener<AuthCubit, AuthState>(
       listener: (context, state) {
         // Restart timer when OTP is resent
-        state.maybeWhen(
-          otpRequired: (sessionId, phone, otpResentAt) {
-            if (otpResentAt != null) {
-              _startTimer();
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: const Text('OTP code sent successfully'),
-                  backgroundColor: const Color(0xFF4CAF50),
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              );
-            }
-          },
-          orElse: () {},
-        );
+        if (state is AuthOtpRequired && state.otpResentAt != null) {
+          _startTimer();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('OTP code sent successfully'),
+              backgroundColor: const Color(0xFF4CAF50),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+          );
+        }
       },
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,

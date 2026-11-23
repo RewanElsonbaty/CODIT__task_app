@@ -418,6 +418,104 @@ class GoldInvoice extends Equatable {
       isComplete: isComplete ?? this.isComplete,
     );
   }
+  
+  /// تحويل إلى JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'created_at': createdAt.toIso8601String(),
+      'line_items': lineItems.map((item) => {
+        'id': item.id,
+        'product': item.product.toJson(),
+        'price_per_gram_piastres': item.pricePerGramPiastres,
+        'making_charge_type': item.makingChargeType.name,
+        'making_charge_per_gram_piastres': item.makingChargePerGramPiastres,
+        'making_charge_fixed_piastres': item.makingChargeFixedPiastres,
+        'discount_percentage': item.discountPercentage,
+        'net_weight_mg': item.netWeightMg,
+        'gold_value_piastres': item.goldValuePiastres,
+        'making_charge_piastres': item.makingChargePiastres,
+        'discount_piastres': item.discountPiastres,
+        'making_charge_after_discount_piastres': item.makingChargeAfterDiscountPiastres,
+        'tax_piastres': item.taxPiastres,
+        'total_piastres': item.totalPiastres,
+      }).toList(),
+      'trade_in': tradeIn != null ? {
+        'weight_mg': tradeIn!.weightMg,
+        'discount_percentage': tradeIn!.discountPercentage,
+        'buy_back_price_per_gram_piastres': tradeIn!.buyBackPricePerGramPiastres,
+        'value_piastres': tradeIn!.valuePiastres,
+      } : null,
+      'payments': payments.map((p) => {
+        'id': p.id,
+        'method': p.method.name,
+        'amount_piastres': p.amountPiastres,
+        'reference': p.reference,
+      }).toList(),
+      'total_gold_value_piastres': totalGoldValuePiastres,
+      'total_making_charge_piastres': totalMakingChargePiastres,
+      'total_discount_piastres': totalDiscountPiastres,
+      'total_tax_piastres': totalTaxPiastres,
+      'subtotal_piastres': subtotalPiastres,
+      'trade_in_value_piastres': tradeInValuePiastres,
+      'grand_total_piastres': grandTotalPiastres,
+      'paid_piastres': paidPiastres,
+      'remaining_piastres': remainingPiastres,
+      'is_draft': isDraft,
+      'is_complete': isComplete,
+    };
+  }
+  
+  /// تحويل من JSON
+  factory GoldInvoice.fromJson(Map<String, dynamic> json) {
+    return GoldInvoice(
+      id: json['id'] as String,
+      createdAt: DateTime.parse(json['created_at'] as String),
+      lineItems: (json['line_items'] as List).map((item) {
+        return InvoiceLineItem(
+          id: item['id'] as String,
+          product: GoldProduct.fromJson(item['product'] as Map<String, dynamic>),
+          pricePerGramPiastres: item['price_per_gram_piastres'] as int,
+          makingChargeType: MakingChargeType.values.byName(item['making_charge_type'] as String),
+          makingChargePerGramPiastres: item['making_charge_per_gram_piastres'] as int,
+          makingChargeFixedPiastres: item['making_charge_fixed_piastres'] as int?,
+          discountPercentage: item['discount_percentage'] as int,
+          netWeightMg: item['net_weight_mg'] as int,
+          goldValuePiastres: item['gold_value_piastres'] as int,
+          makingChargePiastres: item['making_charge_piastres'] as int,
+          discountPiastres: item['discount_piastres'] as int,
+          makingChargeAfterDiscountPiastres: item['making_charge_after_discount_piastres'] as int,
+          taxPiastres: item['tax_piastres'] as int,
+          totalPiastres: item['total_piastres'] as int,
+        );
+      }).toList(),
+      tradeIn: json['trade_in'] != null ? TradeInItem(
+        weightMg: json['trade_in']['weight_mg'] as int,
+        discountPercentage: json['trade_in']['discount_percentage'] as int,
+        buyBackPricePerGramPiastres: json['trade_in']['buy_back_price_per_gram_piastres'] as int,
+        valuePiastres: json['trade_in']['value_piastres'] as int,
+      ) : null,
+      payments: (json['payments'] as List).map((p) {
+        return Payment(
+          id: p['id'] as String,
+          method: PaymentMethod.values.byName(p['method'] as String),
+          amountPiastres: p['amount_piastres'] as int,
+          reference: p['reference'] as String?,
+        );
+      }).toList(),
+      totalGoldValuePiastres: json['total_gold_value_piastres'] as int,
+      totalMakingChargePiastres: json['total_making_charge_piastres'] as int,
+      totalDiscountPiastres: json['total_discount_piastres'] as int,
+      totalTaxPiastres: json['total_tax_piastres'] as int,
+      subtotalPiastres: json['subtotal_piastres'] as int,
+      tradeInValuePiastres: json['trade_in_value_piastres'] as int,
+      grandTotalPiastres: json['grand_total_piastres'] as int,
+      paidPiastres: json['paid_piastres'] as int,
+      remainingPiastres: json['remaining_piastres'] as int,
+      isDraft: json['is_draft'] as bool,
+      isComplete: json['is_complete'] as bool,
+    );
+  }
 }
 
 /// سعر الذهب الحالي

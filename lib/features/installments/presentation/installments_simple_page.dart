@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/shimmer_loading.dart';
 import 'installments_list_cubit.dart';
 
 class InstallmentsSimplePage extends StatelessWidget {
@@ -78,97 +79,103 @@ class _InstallmentsPageContent extends StatelessWidget {
       ),
       body: BlocBuilder<InstallmentsListCubit, InstallmentsListState>(
         builder: (context, state) {
-          return state.when(
-            loading: () => const Center(
-              child: CircularProgressIndicator(color: Colors.green),
-            ),
-            loaded: (installments, selectedFilter) {
-              final cubit = context.read<InstallmentsListCubit>();
-              final filteredInstallments = cubit.getFilteredInstallments();
+          if (state is InstallmentsListLoading) {
+            return const ShimmerInstallmentsList();
+          } else if (state is InstallmentsListLoaded) {
+            final cubit = context.read<InstallmentsListCubit>();
+            final filteredInstallments = cubit.getFilteredInstallments();
 
-              return Column(
-                children: [
-                  // فلاتر
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    color: AppColors.card,
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: [
-                          _buildFilterChip(context, 'الكل', selectedFilter),
-                          const SizedBox(width: 8),
-                          _buildFilterChip(context, 'نشط', selectedFilter),
-                          const SizedBox(width: 8),
-                          _buildFilterChip(context, 'متأخر', selectedFilter),
-                          const SizedBox(width: 8),
-                          _buildFilterChip(context, 'مكتمل', selectedFilter),
-                        ],
-                      ),
+            return Column(
+              children: [
+                // فلاتر
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  color: AppColors.card,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        _buildFilterChip(context, 'الكل', state.selectedFilter),
+                        const SizedBox(width: 8),
+                        _buildFilterChip(context, 'نشط', state.selectedFilter),
+                        const SizedBox(width: 8),
+                        _buildFilterChip(context, 'متأخر', state.selectedFilter),
+                        const SizedBox(width: 8),
+                        _buildFilterChip(context, 'مكتمل', state.selectedFilter),
+                      ],
                     ),
                   ),
+                ),
 
-                  // ملخص سريع
-                  _buildSummaryCards(context, cubit),
+                // ملخص سريع
+                _buildSummaryCards(context, cubit),
 
-                  // قائمة الأقساط
-                  Expanded(
-                    child: filteredInstallments.isEmpty
-                        ? Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.credit_card_off,
-                                  size: 64,
-                                  color: Colors.grey[400],
+                // قائمة الأقساط
+                Expanded(
+                  child: filteredInstallments.isEmpty
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.credit_card_off,
+                                size: 64,
+                                color: Colors.grey[400],
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'لا توجد أقساط',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  color: Colors.grey[600],
                                 ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  'لا توجد أقساط',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    color: Colors.grey[600],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        : RefreshIndicator(
-                            onRefresh: () => cubit.loadInstallments(),
-                            color: Colors.green,
-                            child: ListView.builder(
-                              padding: const EdgeInsets.all(16),
-                              itemCount: filteredInstallments.length,
-                              itemBuilder: (context, index) {
-                                final customer = filteredInstallments[index];
-                                return _buildCustomerCard(customer);
-                              },
-                            ),
+                              ),
+                            ],
                           ),
-                  ),
-                ],
-              );
-            },
-            error: (message) => Center(
+                        )
+                      : RefreshIndicator(
+                          onRefresh: () => cubit.loadInstallments(),
+                          color: Colors.green,
+                          child: ListView.builder(
+                            padding: const EdgeInsets.all(16),
+                            itemCount: filteredInstallments.length,
+                            itemBuilder: (context, index) {
+                              final customer = filteredInstallments[index];
+                              return _buildCustomerCard(customer);
+                            },
+                          ),
+                        ),
+                ),
+              ],
+            );
+          } else if (state is InstallmentsListError) {
+            return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Icon(Icons.error, size: 64, color: AppColors.errorLight),
                   const SizedBox(height: 16),
                   Text(
-                    'حدث خطأ: $message',
+                    'حدث خطأ: ${state.message}',
                     style: const TextStyle(color: AppColors.errorLight),
+                    textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () => context.read<InstallmentsListCubit>().loadInstallments(),
-                    child: const Text('إعادة المحاولة'),
+                  ElevatedButton.icon(
+                    onPressed: state.onRetry ?? () => context.read<InstallmentsListCubit>().loadInstallments(),
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('إعادة المحاولة'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    ),
                   ),
                 ],
               ),
-            ),
-          );
+            );
+          }
+          return const SizedBox.shrink();
         },
       ),
       floatingActionButton: FloatingActionButton.extended(
