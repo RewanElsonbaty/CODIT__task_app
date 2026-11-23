@@ -6,8 +6,8 @@ import 'package:codit/features/authentication/presentation/otp_page.dart';
 import 'package:codit/features/gold_sales/presentation/gold_sale_page.dart';
 import 'package:codit/features/notifications/presentation/pages/notifications_page.dart';
 import 'package:codit/features/approvals/presentation/approvals_page.dart';
-import 'package:codit/features/installments/presentation/installments_page.dart';
-import 'package:codit/features/branches/presentation/branches_page.dart';
+import 'package:codit/features/installments/presentation/installments_simple_page.dart';
+import 'package:codit/features/branches/presentation/branches_simple_page.dart';
 import 'package:codit/core/widgets/font_test_widget.dart';
 import 'package:codit/mocks/scenario_panel_page.dart';
 import 'package:flutter/material.dart';
@@ -93,13 +93,13 @@ GoRouter buildRouter(AuthenticationCubit authCubit) {
       // Installments
       GoRoute(
         path: '/installments',
-        builder: (_, _) => const InstallmentsPage(),
+        builder: (_, _) => const InstallmentsSimplePage(),
       ),
 
       // Branch Monitoring
       GoRoute(
         path: '/branches',
-        builder: (_, _) => const BranchesPage(),
+        builder: (_, _) => const BranchesSimplePage(),
       ),
 
       // Dev Tools

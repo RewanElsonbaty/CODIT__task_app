@@ -1,65 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
+import 'approvals_cubit.dart';
 
-class ApprovalsPage extends StatefulWidget {
+class ApprovalsPage extends StatelessWidget {
   const ApprovalsPage({super.key});
 
   @override
-  State<ApprovalsPage> createState() => _ApprovalsPageState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => ApprovalsCubit(),
+      child: const _ApprovalsPageContent(),
+    );
+  }
 }
 
-class _ApprovalsPageState extends State<ApprovalsPage> {
-  String _selectedFilter = 'الكل';
-
-  // داتا تجريبية للموافقات
-  final List<Map<String, dynamic>> _approvals = [
-    {
-      'id': 'APV-001',
-      'type': 'خصم إضافي',
-      'customer': 'أحمد محمد',
-      'amount': 5000.0,
-      'discount': 15.0,
-      'status': 'قيد الانتظار',
-      'date': '2024-01-15 10:30',
-      'requestedBy': 'محمد أحمد',
-    },
-    {
-      'id': 'APV-002',
-      'type': 'تقسيط',
-      'customer': 'فاطمة علي',
-      'amount': 12000.0,
-      'discount': 0.0,
-      'status': 'موافق عليها',
-      'date': '2024-01-15 09:15',
-      'requestedBy': 'سارة حسن',
-    },
-    {
-      'id': 'APV-003',
-      'type': 'خصم إضافي',
-      'customer': 'عمر خالد',
-      'amount': 8500.0,
-      'discount': 20.0,
-      'status': 'مرفوضة',
-      'date': '2024-01-14 16:45',
-      'requestedBy': 'أحمد علي',
-    },
-    {
-      'id': 'APV-004',
-      'type': 'استبدال',
-      'customer': 'نور حسين',
-      'amount': 3200.0,
-      'discount': 5.0,
-      'status': 'قيد الانتظار',
-      'date': '2024-01-14 14:20',
-      'requestedBy': 'ليلى محمود',
-    },
-  ];
-
-  List<Map<String, dynamic>> get _filteredApprovals {
-    if (_selectedFilter == 'الكل') return _approvals;
-    return _approvals.where((a) => a['status'] == _selectedFilter).toList();
-  }
+class _ApprovalsPageContent extends StatelessWidget {
+  const _ApprovalsPageContent();
 
   @override
   Widget build(BuildContext context) {
@@ -106,74 +64,108 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
           const SizedBox(width: 8),
         ],
       ),
-      body: Column(
-        children: [
-          // فلاتر
-          Container(
-            padding: const EdgeInsets.all(16),
-            color: AppColors.card,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
+      body: BlocBuilder<ApprovalsCubit, ApprovalsState>(
+        builder: (context, state) {
+          return state.when(
+            loading: () => const Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
+            ),
+            loaded: (approvals, selectedFilter) {
+              final cubit = context.read<ApprovalsCubit>();
+              final filteredApprovals = cubit.getFilteredApprovals();
+
+              return Column(
                 children: [
-                  _buildFilterChip('الكل'),
-                  const SizedBox(width: 8),
-                  _buildFilterChip('قيد الانتظار'),
-                  const SizedBox(width: 8),
-                  _buildFilterChip('موافق عليها'),
-                  const SizedBox(width: 8),
-                  _buildFilterChip('مرفوضة'),
+                  // فلاتر
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    color: AppColors.card,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          _buildFilterChip(context, 'الكل', selectedFilter),
+                          const SizedBox(width: 8),
+                          _buildFilterChip(context, 'قيد الانتظار', selectedFilter),
+                          const SizedBox(width: 8),
+                          _buildFilterChip(context, 'موافق عليها', selectedFilter),
+                          const SizedBox(width: 8),
+                          _buildFilterChip(context, 'مرفوضة', selectedFilter),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // قائمة الموافقات
+                  Expanded(
+                    child: filteredApprovals.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.inbox,
+                                  size: 64,
+                                  color: Colors.grey[400],
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'لا توجد موافقات',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : RefreshIndicator(
+                            onRefresh: () => cubit.loadApprovals(),
+                            color: AppColors.primary,
+                            child: ListView.builder(
+                              padding: const EdgeInsets.all(16),
+                              itemCount: filteredApprovals.length,
+                              itemBuilder: (context, index) {
+                                final approval = filteredApprovals[index];
+                                return _buildApprovalCard(context, approval);
+                              },
+                            ),
+                          ),
+                  ),
+                ],
+              );
+            },
+            error: (message) => Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error, size: 64, color: AppColors.errorLight),
+                  const SizedBox(height: 16),
+                  Text(
+                    'حدث خطأ: $message',
+                    style: const TextStyle(color: AppColors.errorLight),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => context.read<ApprovalsCubit>().loadApprovals(),
+                    child: const Text('إعادة المحاولة'),
+                  ),
                 ],
               ),
             ),
-          ),
-
-          // قائمة الموافقات
-          Expanded(
-            child: _filteredApprovals.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.inbox,
-                          size: 64,
-                          color: Colors.grey[400],
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'لا توجد موافقات',
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: _filteredApprovals.length,
-                    itemBuilder: (context, index) {
-                      final approval = _filteredApprovals[index];
-                      return _buildApprovalCard(approval);
-                    },
-                  ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
 
-  Widget _buildFilterChip(String label) {
-    final isSelected = _selectedFilter == label;
+  Widget _buildFilterChip(BuildContext context, String label, String selectedFilter) {
+    final isSelected = selectedFilter == label;
     return FilterChip(
       label: Text(label),
       selected: isSelected,
       onSelected: (selected) {
-        setState(() {
-          _selectedFilter = label;
-        });
+        context.read<ApprovalsCubit>().filterApprovals(label);
       },
       selectedColor: AppColors.primary.withOpacity(0.3),
       checkmarkColor: AppColors.primary,
@@ -184,20 +176,36 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
     );
   }
 
-  Widget _buildApprovalCard(Map<String, dynamic> approval) {
+  Widget _buildApprovalCard(BuildContext context, Map<String, dynamic> approval) {
+    // تحويل الحالة
+    String displayStatus;
+    switch (approval['status']) {
+      case 'pending':
+        displayStatus = 'قيد الانتظار';
+        break;
+      case 'approved':
+        displayStatus = 'موافق عليها';
+        break;
+      case 'rejected':
+        displayStatus = 'مرفوضة';
+        break;
+      default:
+        displayStatus = approval['status'];
+    }
+
     Color statusColor;
     IconData statusIcon;
 
     switch (approval['status']) {
-      case 'قيد الانتظار':
+      case 'pending':
         statusColor = AppColors.warningDark;
         statusIcon = Icons.hourglass_empty;
         break;
-      case 'موافق عليها':
+      case 'approved':
         statusColor = AppColors.successDark;
         statusIcon = Icons.check_circle;
         break;
-      case 'مرفوضة':
+      case 'rejected':
         statusColor = AppColors.errorDark;
         statusIcon = Icons.cancel;
         break;
@@ -205,6 +213,11 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
         statusColor = Colors.grey;
         statusIcon = Icons.help;
     }
+
+    // استخراج البيانات من metadata
+    final metadata = approval['metadata'] as Map<String, dynamic>?;
+    final amount = metadata?['original_price'] ?? metadata?['amount'] ?? 0.0;
+    final discount = metadata?['discount_percentage'] ?? 0.0;
 
     return Card(
       color: AppColors.card,
@@ -270,7 +283,7 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
                       Icon(statusIcon, color: statusColor, size: 18),
                       const SizedBox(width: 4),
                       Text(
-                        approval['status'],
+                        displayStatus,
                         style: TextStyle(
                           color: statusColor,
                           fontWeight: FontWeight.bold,
@@ -284,71 +297,75 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
 
               const SizedBox(height: 12),
 
-              // تفاصيل العميل
-              Row(
-                children: [
-                  const Icon(
-                    Icons.person,
-                    color: AppColors.textSecondary,
-                    size: 16,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    approval['customer'],
-                    style: const TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
+              // العنوان
+              Text(
+                approval['title'],
+                style: const TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+
+              const SizedBox(height: 8),
+
+              // الوصف
+              Text(
+                approval['description'],
+                style: const TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 13,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
 
               const SizedBox(height: 8),
 
               // المبلغ والخصم
-              Row(
-                children: [
-                  Expanded(
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.attach_money,
-                          color: AppColors.goldenNeon,
-                          size: 16,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${approval['amount']} جنيه',
-                          style: const TextStyle(
-                            color: AppColors.textPrimary,
-                            fontSize: 14,
+              if (amount > 0)
+                Row(
+                  children: [
+                    Expanded(
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.attach_money,
+                            color: AppColors.goldenNeon,
+                            size: 16,
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: 4),
+                          Text(
+                            '${amount.toStringAsFixed(0)} جنيه',
+                            style: const TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  if (approval['discount'] > 0)
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.discount,
-                          color: Colors.orange,
-                          size: 16,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          'خصم ${approval['discount']}%',
-                          style: const TextStyle(
+                    if (discount > 0)
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.discount,
                             color: Colors.orange,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
+                            size: 16,
                           ),
-                        ),
-                      ],
-                    ),
-                ],
-              ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'خصم ${discount.toStringAsFixed(0)}%',
+                            style: const TextStyle(
+                              color: Colors.orange,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                  ],
+                ),
 
               const Divider(height: 24, color: AppColors.textSecondary),
 
@@ -365,7 +382,7 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        approval['date'],
+                        _formatDate(approval['created_at']),
                         style: const TextStyle(
                           color: AppColors.textSecondary,
                           fontSize: 12,
@@ -374,7 +391,7 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
                     ],
                   ),
                   Text(
-                    'طلبها: ${approval['requestedBy']}',
+                    'طلبها: ${approval['requester_name']}',
                     style: const TextStyle(
                       color: AppColors.textSecondary,
                       fontSize: 12,
@@ -387,5 +404,21 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
         ),
       ),
     );
+  }
+
+  String _formatDate(String isoDate) {
+    final date = DateTime.parse(isoDate);
+    final now = DateTime.now();
+    final diff = now.difference(date);
+
+    if (diff.inMinutes < 60) {
+      return 'منذ ${diff.inMinutes} دقيقة';
+    } else if (diff.inHours < 24) {
+      return 'منذ ${diff.inHours} ساعة';
+    } else if (diff.inDays < 7) {
+      return 'منذ ${diff.inDays} يوم';
+    } else {
+      return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+    }
   }
 }

@@ -112,7 +112,8 @@ class NotificationsCubit extends Cubit<NotificationsState> {
         return currentState.notifications
             .where((n) =>
                 n.type == NotificationType.systemAlert ||
-                n.type == NotificationType.priceUpdate)
+                n.type == NotificationType.priceUpdate ||
+                n.type == NotificationType.branchAlert)
             .toList();
     }
   }
@@ -186,6 +187,15 @@ class NotificationsCubit extends Cubit<NotificationsState> {
       ),
       AppNotification(
         id: '7',
+        title: 'تنبيه من فرع المعادي',
+        body: 'فرع المعادي وصل لـ 90% من طاقته - يحتاج موظفين إضافيين',
+        type: NotificationType.branchAlert,
+        timestamp: now.subtract(const Duration(hours: 4)),
+        isRead: false,
+        data: {'branchId': 'BR-001', 'capacity': '90'},
+      ),
+      AppNotification(
+        id: '8',
         title: 'تنبيه النظام',
         body: 'سيتم إجراء صيانة على النظام غداً الساعة 2 صباحاً',
         type: NotificationType.systemAlert,
@@ -194,7 +204,7 @@ class NotificationsCubit extends Cubit<NotificationsState> {
         data: {'maintenanceDate': '2024-01-15'},
       ),
       AppNotification(
-        id: '8',
+        id: '9',
         title: 'إشعار عام',
         body: 'تم إضافة ميزات جديدة للنظام',
         type: NotificationType.general,

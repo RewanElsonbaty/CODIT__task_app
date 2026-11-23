@@ -219,8 +219,38 @@ class MockApprovalsApi {
     };
   }
 
-  /// الموافقة على طلب
-  Future<Map<String, dynamic>> approveRequest({
+  /// الحصول على كل الطلبات (للصفحة الرئيسية)
+  Future<List<Map<String, dynamic>>> getApprovals() async {
+    await _client.get('/approvals/requests');
+    
+    // ترتيب حسب التاريخ
+    final sorted = List<Map<String, dynamic>>.from(_requests);
+    sorted.sort((a, b) {
+      final dateA = DateTime.parse(a['created_at'] as String);
+      final dateB = DateTime.parse(b['created_at'] as String);
+      return dateB.compareTo(dateA);
+    });
+    
+    return sorted;
+  }
+
+  /// الموافقة على طلب (مبسطة للصفحة الجديدة)
+  Future<void> approveRequest(String requestId) async {
+    final request = _requests.firstWhere((r) => r['id'] == requestId);
+    request['status'] = 'approved';
+    request['approved_at'] = DateTime.now().toIso8601String();
+  }
+
+  /// رفض طلب (مبسطة للصفحة الجديدة)
+  Future<void> rejectRequest(String requestId, String reason) async {
+    final request = _requests.firstWhere((r) => r['id'] == requestId);
+    request['status'] = 'rejected';
+    request['rejected_at'] = DateTime.now().toIso8601String();
+    request['rejection_reason'] = reason;
+  }
+
+  /// الموافقة على طلب (النسخة الأصلية)
+  Future<Map<String, dynamic>> approveRequestFull({
     required String requestId,
     required String userId,
     String? notes,

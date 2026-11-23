@@ -1,79 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
+import 'installments_list_cubit.dart';
 
-class InstallmentsPage extends StatefulWidget {
+class InstallmentsPage extends StatelessWidget {
   const InstallmentsPage({super.key});
 
   @override
-  State<InstallmentsPage> createState() => _InstallmentsPageState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => InstallmentsListCubit(),
+      child: const _InstallmentsPageContent(),
+    );
+  }
 }
 
-class _InstallmentsPageState extends State<InstallmentsPage> {
-  String _selectedFilter = 'الكل';
-
-  // داتا تجريبية للأقساط
-  final List<Map<String, dynamic>> _installments = [
-    {
-      'id': 'INST-001',
-      'customer': 'سارة محمود',
-      'phone': '01012345678',
-      'totalAmount': 15000.0,
-      'paidAmount': 9000.0,
-      'remainingAmount': 6000.0,
-      'monthlyPayment': 1500.0,
-      'nextPaymentDate': '2024-02-01',
-      'status': 'نشط',
-      'installmentsCount': 10,
-      'paidInstallments': 6,
-    },
-    {
-      'id': 'INST-002',
-      'customer': 'خالد أحمد',
-      'phone': '01098765432',
-      'totalAmount': 20000.0,
-      'paidAmount': 20000.0,
-      'remainingAmount': 0.0,
-      'monthlyPayment': 2000.0,
-      'nextPaymentDate': '-',
-      'status': 'مكتمل',
-      'installmentsCount': 10,
-      'paidInstallments': 10,
-    },
-    {
-      'id': 'INST-003',
-      'customer': 'مريم حسن',
-      'phone': '01123456789',
-      'totalAmount': 12000.0,
-      'paidAmount': 4000.0,
-      'remainingAmount': 8000.0,
-      'monthlyPayment': 1000.0,
-      'nextPaymentDate': '2024-01-20',
-      'status': 'متأخر',
-      'installmentsCount': 12,
-      'paidInstallments': 4,
-    },
-    {
-      'id': 'INST-004',
-      'customer': 'عمر فتحي',
-      'phone': '01156781234',
-      'totalAmount': 25000.0,
-      'paidAmount': 12500.0,
-      'remainingAmount': 12500.0,
-      'monthlyPayment': 2500.0,
-      'nextPaymentDate': '2024-02-05',
-      'status': 'نشط',
-      'installmentsCount': 10,
-      'paidInstallments': 5,
-    },
-  ];
-
-  List<Map<String, dynamic>> get _filteredInstallments {
-    if (_selectedFilter == 'الكل') return _installments;
-    return _installments
-        .where((i) => i['status'] == _selectedFilter)
-        .toList();
-  }
+class _InstallmentsPageContent extends StatelessWidget {
+  const _InstallmentsPageContent();
 
   @override
   Widget build(BuildContext context) {

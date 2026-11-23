@@ -3,6 +3,7 @@ import 'package:codit/features/notifications/domain/notification_models.dart';
 import 'package:codit/features/notifications/presentation/notifications_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class NotificationCard extends StatelessWidget {
@@ -284,19 +285,148 @@ class NotificationCard extends StatelessWidget {
   }
 
   void _handleAction(BuildContext context) {
-    // TODO: Implement navigation based on notification type and data
-    // For now, just show a snackbar
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'فتح ${notification.type.label}',
-          textDirection: TextDirection.rtl,
-        ),
-        backgroundColor: notification.type.color,
-        behavior: SnackBarBehavior.floating,
+    // Navigate based on notification type
+    switch (notification.type) {
+      case NotificationType.approvalRequest:
+      case NotificationType.approvalResponse:
+        // الانتقال لصفحة الموافقات
+        context.go('/approvals');
+        break;
+
+      case NotificationType.saleCompleted:
+        // الانتقال لصفحة بيع الذهب
+        context.go('/gold');
+        break;
+
+      case NotificationType.installmentDue:
+      case NotificationType.installmentCollected:
+        // الانتقال لصفحة الأقساط
+        context.go('/installments');
+        break;
+
+      case NotificationType.priceUpdate:
+        // الانتقال لصفحة بيع الذهب (لأن فيها الأسعار)
+        context.go('/gold');
+        break;
+
+      case NotificationType.branchAlert:
+        // الانتقال لصفحة مراقبة الفروع
+        context.go('/branches');
+        break;
+
+      case NotificationType.systemAlert:
+      case NotificationType.general:
+        // البقاء في صفحة الإشعارات أو الذهاب للـ home
+        // يمكن عرض dialog بدل Navigation
+        _showNotificationDetails(context);
+        break;
+    }
+  }
+
+  void _showNotificationDetails(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.card,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: notification.type.color,
+            width: 2,
+          ),
         ),
+        title: Row(
+          children: [
+            Icon(
+              notification.type.icon,
+              color: notification.type.color,
+              size: 28,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                notification.title,
+                style: const TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              notification.body,
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 15,
+                height: 1.5,
+              ),
+            ),
+            if (notification.data != null && notification.data!.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              const Divider(color: AppColors.border),
+              const SizedBox(height: 8),
+              const Text(
+                'تفاصيل إضافية:',
+                style: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 8),
+              ...notification.data!.entries.map((entry) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Row(
+                    children: [
+                      Text(
+                        '${entry.key}: ',
+                        style: const TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 13,
+                        ),
+                      ),
+                      Text(
+                        entry.value.toString(),
+                        style: TextStyle(
+                          color: notification.type.color,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text(
+              'إغلاق',
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
+          ),
+          if (notification.actionUrl != null)
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                context.go('/home');
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: notification.type.color,
+              ),
+              child: const Text('الذهاب'),
+            ),
+        ],
       ),
     );
   }

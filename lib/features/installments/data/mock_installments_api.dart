@@ -85,6 +85,18 @@ class MockInstallmentsApi {
     ]);
   }
 
+  /// الحصول على كل العملاء مع أقساطهم (للصفحة الرئيسية)
+  Future<List<Map<String, dynamic>>> getCustomers() async {
+    await _client.get('/installments/customers');
+    return _customers;
+  }
+
+  /// الحصول على كل العملاء مع أقساطهم
+  Future<Map<String, dynamic>> getCustomersWithContracts() async {
+    await _client.get('/installments/customers');
+    return {'success': true, 'data': _customers};
+  }
+
   /// إنشاء عقد أقساط جديد
   Future<Map<String, dynamic>> createContract({
     required String customerId,

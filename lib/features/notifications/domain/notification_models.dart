@@ -43,6 +43,9 @@ enum NotificationType {
   @JsonValue('price_update')
   priceUpdate,
 
+  @JsonValue('branch_alert')
+  branchAlert,
+
   @JsonValue('system_alert')
   systemAlert,
 
@@ -63,6 +66,8 @@ enum NotificationType {
         return 'تحصيل قسط';
       case NotificationType.priceUpdate:
         return 'تحديث الأسعار';
+      case NotificationType.branchAlert:
+        return 'تنبيه فرع';
       case NotificationType.systemAlert:
         return 'تنبيه النظام';
       case NotificationType.general:
@@ -84,6 +89,8 @@ enum NotificationType {
         return Icons.payment;
       case NotificationType.priceUpdate:
         return Icons.trending_up;
+      case NotificationType.branchAlert:
+        return Icons.store;
       case NotificationType.systemAlert:
         return Icons.warning;
       case NotificationType.general:
@@ -104,6 +111,8 @@ enum NotificationType {
       case NotificationType.installmentCollected:
         return const Color(0xFF4CAF50); // success
       case NotificationType.priceUpdate:
+        return const Color(0xFF9C27B0); // purple
+      case NotificationType.branchAlert:
         return const Color(0xFF9C27B0); // purple
       case NotificationType.systemAlert:
         return const Color(0xFFF44336); // error
