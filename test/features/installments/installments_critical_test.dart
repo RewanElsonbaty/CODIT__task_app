@@ -120,6 +120,7 @@ void main() {
         lateFeePercentage: 5.0, // 5% رسوم تأخير
       );
 
+      // ignore: unused_local_variable
       final contractId = createResult['data']['id'] as String;
       final monthlyInstallment = createResult['data']['monthly_installment'] as double;
 

@@ -39,6 +39,7 @@ void main() {
     test('Real-time Simulation: تحديثات متتالية', () async {
       // 1. الحصول على metrics أولية
       final initial = await api.getLiveMetrics('branch_main');
+      // ignore: unused_local_variable
       final initialSales = initial['data']['today_sales_total'] as double;
 
       // 2. محاكاة تحديث حي

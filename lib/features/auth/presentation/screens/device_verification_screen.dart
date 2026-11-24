@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:device_info_plus/device_info_plus.dart';
+import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import '../auth_cubit.dart';
 
 /// Device verification screen for new device login
@@ -21,6 +24,11 @@ class _DeviceVerificationScreenState extends State<DeviceVerificationScreen>
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
   late Animation<double> _rotateAnimation;
+  
+  // Device info
+  String _deviceId = '';
+  String _deviceName = '';
+  bool _deviceInfoLoaded = false;
 
   @override
   void initState() {
@@ -48,6 +56,73 @@ class _DeviceVerificationScreenState extends State<DeviceVerificationScreen>
     ));
 
     _controller.forward();
+    _initializeDeviceInfo();
+  }
+
+  /// Initialize device info
+  Future<void> _initializeDeviceInfo() async {
+    try {
+      final deviceInfo = DeviceInfoPlugin();
+
+      if (kIsWeb) {
+        final webInfo = await deviceInfo.webBrowserInfo;
+        setState(() {
+          _deviceId = webInfo.userAgent.hashCode.toString();
+          _deviceName = '${webInfo.browserName} ${webInfo.platform}';
+          _deviceInfoLoaded = true;
+        });
+      } else if (Platform.isAndroid) {
+        final androidInfo = await deviceInfo.androidInfo;
+        setState(() {
+          _deviceId = androidInfo.id;
+          _deviceName = '${androidInfo.manufacturer} ${androidInfo.model}';
+          _deviceInfoLoaded = true;
+        });
+      } else if (Platform.isIOS) {
+        final iosInfo = await deviceInfo.iosInfo;
+        setState(() {
+          _deviceId = iosInfo.identifierForVendor ?? 'unknown';
+          _deviceName = '${iosInfo.name} (${iosInfo.model})';
+          _deviceInfoLoaded = true;
+        });
+      } else if (Platform.isWindows) {
+        final windowsInfo = await deviceInfo.windowsInfo;
+        setState(() {
+          _deviceId = windowsInfo.deviceId;
+          _deviceName = windowsInfo.computerName;
+          _deviceInfoLoaded = true;
+        });
+      } else if (Platform.isLinux) {
+        final linuxInfo = await deviceInfo.linuxInfo;
+        setState(() {
+          _deviceId = linuxInfo.machineId ?? 'unknown';
+          _deviceName = linuxInfo.prettyName;
+          _deviceInfoLoaded = true;
+        });
+      } else if (Platform.isMacOS) {
+        final macosInfo = await deviceInfo.macOsInfo;
+        setState(() {
+          _deviceId = macosInfo.systemGUID ?? 'unknown';
+          _deviceName = macosInfo.computerName;
+          _deviceInfoLoaded = true;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error getting device info: $e');
+      setState(() {
+        _deviceId = 'unknown';
+        _deviceName = 'Unknown Device';
+        _deviceInfoLoaded = true;
+      });
+    }
+  }
+
+  /// Mask device ID for display (show only first 3 and last 3 characters)
+  String _getMaskedDeviceId() {
+    if (_deviceId.length <= 6) return _deviceId;
+    final first = _deviceId.substring(0, 3);
+    final last = _deviceId.substring(_deviceId.length - 3);
+    return '$first***$last';
   }
 
   @override
@@ -321,13 +396,13 @@ class _DeviceVerificationScreenState extends State<DeviceVerificationScreen>
           _buildInfoRow(
             icon: Icons.phone_android,
             label: 'نوع الجهاز',
-            value: 'Android Device', // TODO: Get from device info
+            value: _deviceInfoLoaded ? _deviceName : 'جاري التحميل...',
           ),
           const SizedBox(height: 16),
           _buildInfoRow(
             icon: Icons.device_hub,
             label: 'معرف الجهاز',
-            value: 'device_***123', // TODO: Get from device info (masked)
+            value: _deviceInfoLoaded ? _getMaskedDeviceId() : 'جاري التحميل...',
           ),
           const SizedBox(height: 16),
           _buildInfoRow(
@@ -425,10 +500,20 @@ class _DeviceVerificationScreenState extends State<DeviceVerificationScreen>
   }
 
   void _handleConfirm(BuildContext context) {
+    if (!_deviceInfoLoaded) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('جاري تحميل بيانات الجهاز...'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
     context.read<AuthCubit>().verifyDevice(
           deviceVerificationId: widget.verificationId,
-          deviceId: 'device_123', // TODO: Get real device ID
-          deviceName: 'Android Device', // TODO: Get real device name
+          deviceId: _deviceId,
+          deviceName: _deviceName,
         );
   }
 

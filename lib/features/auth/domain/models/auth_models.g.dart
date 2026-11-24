@@ -47,6 +47,7 @@ Map<String, dynamic> _$AuthUserToJson(_AuthUser instance) => <String, dynamic>{
 
 _LoginRequest _$LoginRequestFromJson(Map<String, dynamic> json) =>
     _LoginRequest(
+      username: json['username'] as String,
       phone: json['phone'] as String,
       password: json['password'] as String,
       deviceId: json['deviceId'] as String?,
@@ -55,6 +56,7 @@ _LoginRequest _$LoginRequestFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$LoginRequestToJson(_LoginRequest instance) =>
     <String, dynamic>{
+      'username': instance.username,
       'phone': instance.phone,
       'password': instance.password,
       'deviceId': instance.deviceId,
@@ -66,6 +68,7 @@ _LoginResponse _$LoginResponseFromJson(Map<String, dynamic> json) =>
       requiresOtp: json['requiresOtp'] as bool,
       requiresDeviceVerification: json['requiresDeviceVerification'] as bool,
       sessionId: json['sessionId'] as String?,
+      deviceVerificationId: json['deviceVerificationId'] as String?,
       tokens: json['tokens'] == null
           ? null
           : AuthTokens.fromJson(json['tokens'] as Map<String, dynamic>),
@@ -79,6 +82,7 @@ Map<String, dynamic> _$LoginResponseToJson(_LoginResponse instance) =>
       'requiresOtp': instance.requiresOtp,
       'requiresDeviceVerification': instance.requiresDeviceVerification,
       'sessionId': instance.sessionId,
+      'deviceVerificationId': instance.deviceVerificationId,
       'tokens': instance.tokens,
       'user': instance.user,
     };

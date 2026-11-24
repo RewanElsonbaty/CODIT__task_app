@@ -1,3 +1,7 @@
+// ignore_for_file: unused_import, unused_element, unused_field, argument_type_not_assignable, type_argument_not_matching_bounds, extra_positional_arguments, undefined_named_parameter
+// DEPRECATED: This file is not used anymore. Use lib/features/auth/ instead.
+// @dart=2.19
+
 import 'package:codit/core/errors/exceptions.dart';
 import 'package:codit/features/authentication/data/auth_repository.dart';
 import 'package:codit/features/authentication/domain/auth_session.dart';

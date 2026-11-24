@@ -53,6 +53,7 @@ class AuthUser with _$AuthUser {
 @freezed
 class LoginRequest with _$LoginRequest {
   const factory LoginRequest({
+    required String username,
     required String phone,
     required String password,
     String? deviceId,
@@ -70,6 +71,7 @@ class LoginResponse with _$LoginResponse {
     required bool requiresOtp,
     required bool requiresDeviceVerification,
     String? sessionId, // For OTP verification
+    String? deviceVerificationId, // For device verification
     AuthTokens? tokens, // If no OTP required
     AuthUser? user,
   }) = _LoginResponse;

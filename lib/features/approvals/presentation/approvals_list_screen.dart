@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/app_colors.dart';
-import '../../../core/utils/responsive_utils.dart';
-import '../data/mock_approvals_api.dart';
-import 'package:intl/intl.dart';
+import 'package:codit/core/theme/app_colors.dart';
+import 'package:codit/core/utils/responsive_utils.dart';
+import 'package:codit/features/approvals/data/mock_approvals_api.dart';
 
 /// شاشة قائمة الموافقات
 class ApprovalsListScreen extends StatefulWidget {

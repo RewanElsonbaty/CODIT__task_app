@@ -140,7 +140,3 @@ enum GoldCategory {
     }
   }
 }
-
-class _ActionButtons {
-  const _ActionButtons();
-}

@@ -1,11 +1,11 @@
-import 'package:codit/features/authentication/presentation/authentication_cubit.dart';
+import 'package:codit/features/auth/presentation/auth_cubit.dart';
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 
 class DeepLinkHandler {
   DeepLinkHandler(this._authCubit);
 
-  final AuthenticationCubit _authCubit;
+  final AuthCubit _authCubit;
   String? _pendingRoute;
 
   /// Handle incoming deep link
@@ -28,7 +28,7 @@ class DeepLinkHandler {
     final authState = _authCubit.state;
 
     // If not authenticated, save pending route and wait for login
-    if (authState is! AuthReady) {
+    if (authState is! AuthAuthenticated) {
       debugPrint('[DeepLink] Not authenticated, saving pending route');
       _pendingRoute = '/approvals/$approvalId';
       // User needs to log in first

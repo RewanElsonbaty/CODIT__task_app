@@ -1,4 +1,6 @@
 import 'package:codit/core/theme/app_colors.dart';
+import 'package:codit/core/utils/responsive_utils.dart';
+import 'package:codit/core/utils/exception_handler.dart';
 import 'package:codit/features/authentication/presentation/authentication_cubit.dart';
 import 'package:codit/features/home/presentation/widgets/home_menu_list.dart';
 import 'package:codit/features/home/presentation/widgets/home_session_header.dart';
@@ -13,12 +15,13 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final session = context.watch<AuthenticationCubit>().session;
+    
     return Scaffold(
       appBar: AppBar(
         title: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(8),
+              padding: EdgeInsets.all(ResponsiveUtils.spacing(context)),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
@@ -26,44 +29,73 @@ class HomePage extends StatelessWidget {
                     AppColors.goldenNeon.withOpacity(0.1),
                   ],
                 ),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(ResponsiveUtils.radius(context)),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.home,
                 color: AppColors.goldenNeon,
-                size: 24,
+                size: ResponsiveUtils.iconSize(context),
               ),
             ),
-            const SizedBox(width: 12),
-            const Text('الرئيسية'),
+            SizedBox(width: ResponsiveUtils.spacing(context, factor: 1.5)),
+            Text(
+              'الرئيسية',
+              style: TextStyle(
+                fontSize: ResponsiveUtils.textSizeLarge(context),
+              ),
+            ),
           ],
         ),
         actions: [
           const NotificationIconButton(),
-          const SizedBox(width: 8),
+          SizedBox(width: ResponsiveUtils.spacing(context)),
           TextButton.icon(
             onPressed: () async {
-              await context.read<AuthenticationCubit>().logout();
-              if (context.mounted) context.go('/login');
+              try {
+                await context.read<AuthenticationCubit>().logout();
+                if (context.mounted) context.go('/login');
+              } catch (e) {
+                ExceptionHandler.logException(e);
+                if (context.mounted) {
+                  ExceptionHandler.showErrorSnackBar(context, e);
+                }
+              }
             },
-            icon: const Icon(Icons.logout, color: Colors.white, size: 20),
-            label: const Text('خروج', style: TextStyle(color: Colors.white)),
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-            child: HomeSessionHeader(
-              shopName: session.shopName ?? '',
-              userName: session.userName ?? '',
+            icon: Icon(
+              Icons.logout,
+              color: Colors.white,
+              size: ResponsiveUtils.iconSize(context) * 0.8,
+            ),
+            label: Text(
+              'خروج',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: ResponsiveUtils.textSizeMedium(context),
+              ),
             ),
           ),
-          const Expanded(child: HomeMenuList()),
+          SizedBox(width: ResponsiveUtils.spacing(context)),
         ],
+      ),
+      body: ResponsiveContainer(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: EdgeInsets.fromLTRB(
+                ResponsiveUtils.horizontalPadding(context),
+                ResponsiveUtils.verticalPadding(context),
+                ResponsiveUtils.horizontalPadding(context),
+                0,
+              ),
+              child: HomeSessionHeader(
+                shopName: session.shopName ?? '',
+                userName: session.userName ?? '',
+              ),
+            ),
+            const Expanded(child: HomeMenuList()),
+          ],
+        ),
       ),
     );
   }

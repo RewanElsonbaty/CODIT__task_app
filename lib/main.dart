@@ -4,7 +4,7 @@ import 'package:codit/core/di/injection.dart';
 import 'package:codit/core/localization/app_localizations.dart';
 import 'package:codit/core/routing/app_router.dart';
 import 'package:codit/core/theme/luxury_theme.dart';
-import 'package:codit/features/authentication/presentation/authentication_cubit.dart';
+import 'package:codit/features/auth/presentation/auth_cubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
@@ -45,7 +45,7 @@ class _CoditAppState extends State<CoditApp> {
   @override
   void initState() {
     super.initState();
-    final authCubit = getIt<AuthenticationCubit>();
+    final authCubit = getIt<AuthCubit>();
     _deepLinkHandler = DeepLinkHandler(authCubit);
     _router = buildRouter(authCubit);
     _appLinks = AppLinks();
@@ -64,9 +64,9 @@ class _CoditAppState extends State<CoditApp> {
 
     // Listen to auth state changes to handle pending links
     authCubit.stream.listen((state) {
-      if (state is AuthReady) {
+      if (state is AuthAuthenticated) {
         _deepLinkHandler.handlePendingLink(_router);
-      } else if (state is AuthInitial) {
+      } else if (state is AuthUnauthenticated) {
         _deepLinkHandler.clearPending();
       }
     });
@@ -74,7 +74,7 @@ class _CoditAppState extends State<CoditApp> {
 
   @override
   Widget build(BuildContext context) {
-    final authCubit = getIt<AuthenticationCubit>();
+    final authCubit = getIt<AuthCubit>();
     return BlocProvider.value(
       value: authCubit,
       child: MaterialApp.router(

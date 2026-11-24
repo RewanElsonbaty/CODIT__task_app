@@ -25,8 +25,9 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  /// Login with phone and password
+  /// Login with username, phone and password
   Future<void> login({
+    required String username,
     required String phone,
     required String password,
     String? deviceId,
@@ -35,6 +36,7 @@ class AuthCubit extends Cubit<AuthState> {
     emit(AuthLoading());
 
     final request = LoginRequest(
+      username: username,
       phone: phone,
       password: password,
       deviceId: deviceId,
@@ -55,7 +57,7 @@ class AuthCubit extends Cubit<AuthState> {
         } else if (response.requiresDeviceVerification) {
           // Device verification required
           emit(AuthDeviceVerificationRequired(
-            deviceVerificationId: '', // TODO: Get from response
+            deviceVerificationId: response.deviceVerificationId ?? 'unknown',
           ));
         } else {
           // Direct login successful

@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../core/di/injection.dart';
-import '../domain/models/branch_selection.dart';
-import 'branch_dashboard_cubit.dart';
-import 'widgets/branch_selector.dart';
-import 'widgets/sales_summary_card.dart';
-import 'widgets/cash_summary_card.dart';
-import 'widgets/gold_prices_card.dart';
-import 'widgets/recent_operations_card.dart';
+import 'package:codit/core/di/injection.dart';
+import 'package:codit/core/utils/responsive_utils.dart';
+import 'package:codit/core/utils/exception_handler.dart';
+import 'package:codit/features/branches/presentation/branches_cubit.dart';
+import 'package:codit/features/branches_dashboard/domain/models/branch_selection.dart';
+import 'package:codit/features/branches_dashboard/presentation/branch_dashboard_cubit.dart';
+import 'package:codit/features/branches_dashboard/presentation/widgets/branch_selector.dart';
+import 'package:codit/features/branches_dashboard/presentation/widgets/sales_summary_card.dart';
+import 'package:codit/features/branches_dashboard/presentation/widgets/cash_summary_card.dart';
+import 'package:codit/features/branches_dashboard/presentation/widgets/gold_prices_card.dart';
+import 'package:codit/features/branches_dashboard/presentation/widgets/recent_operations_card.dart';
 
 /// Branch dashboard page for monitoring business performance
 class BranchDashboardPage extends StatelessWidget {
@@ -15,8 +18,15 @@ class BranchDashboardPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => getIt<BranchDashboardCubit>()..initialize(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (_) => getIt<BranchDashboardCubit>()..initialize(),
+        ),
+        BlocProvider(
+          create: (_) => BranchesCubit()..loadBranches(),
+        ),
+      ],
       child: const _BranchDashboardView(),
     );
   }
@@ -113,57 +123,95 @@ class _BranchDashboardView extends StatelessWidget {
     bool isOffline, [
     DateTime? lastUpdate,
   ]) {
+    final isMobile = ResponsiveUtils.isMobile(context);
+    final spacing = ResponsiveUtils.spacing(context, factor: 2);
+    
     return RefreshIndicator(
-      onRefresh: () => context.read<BranchDashboardCubit>().refresh(),
+      onRefresh: () async {
+        try {
+          await context.read<BranchDashboardCubit>().refresh();
+        } catch (e) {
+          ExceptionHandler.logException(e);
+          if (context.mounted) {
+            ExceptionHandler.showErrorSnackBar(context, e);
+          }
+        }
+      },
       color: Color(0xFFD4AF37),
       child: SingleChildScrollView(
         physics: AlwaysScrollableScrollPhysics(),
-        padding: EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Offline indicator
-            if (isOffline) ...[
-              _buildOfflineIndicator(lastUpdate!),
-              SizedBox(height: 16),
-            ],
-
-            // Branch selector
-            // TODO: Get available branches from repository
-            BranchSelector(
-              currentSelection: BranchSelection.all(),
-              availableBranches: [], // TODO: Load from repository
-              onBranchChanged: (selection) {
-                context.read<BranchDashboardCubit>().changeBranch(selection);
-              },
-            ),
-            SizedBox(height: 16),
-
-            // Sales summary
-            SalesSummaryCard(sales: summary.sales),
-            SizedBox(height: 16),
-
-            // Cash and gold prices in row
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: CashSummaryCard(cash: summary.cash),
-                ),
-                SizedBox(width: 16),
-                Expanded(
-                  child: GoldPricesCard(prices: summary.goldPrices),
-                ),
+        padding: EdgeInsets.all(ResponsiveUtils.horizontalPadding(context)),
+        child: ResponsiveContainer(
+          maxWidth: ResponsiveUtils.valueWhen(
+            context: context,
+            mobile: double.infinity,
+            tablet: 800,
+            desktop: 1200,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Offline indicator
+              if (isOffline) ...[
+                _buildOfflineIndicator(lastUpdate!),
+                SizedBox(height: spacing),
               ],
-            ),
-            SizedBox(height: 16),
 
-            // Recent operations
-            RecentOperationsCard(operations: summary.recentOperations),
-          ],
-        ),
-      ),
-    );
+              // Branch selector - Get available branches from BranchesCubit
+              BlocBuilder<BranchesCubit, BranchesState>(
+                builder: (context, branchesState) {
+                  List<BranchInfo> availableBranches = [];
+                  
+                  if (branchesState is BranchesLoaded) {
+                    availableBranches = branchesState.branches.map((branch) {
+                      return BranchInfo(
+                        id: branch['id'] as String,
+                        name: branch['name'] as String,
+                        isActive: branch['status'] == 'نشط',
+                      );
+                    }).toList();
+                  }
+                  
+                  return BranchSelector(
+                    currentSelection: BranchSelection.all(),
+                    availableBranches: availableBranches,
+                    onBranchChanged: (selection) {
+                      context.read<BranchDashboardCubit>().changeBranch(selection);
+                    },
+                  );
+                },
+              ),
+              SizedBox(height: spacing),
+
+              // Sales summary
+              SalesSummaryCard(sales: summary.sales),
+              SizedBox(height: spacing),
+
+              // Cash and gold prices - responsive layout
+              ResponsiveLayout(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: CashSummaryCard(cash: summary.cash),
+                  ),
+                  SizedBox(
+                    width: isMobile ? 0 : spacing,
+                    height: isMobile ? spacing : 0,
+                  ),
+                  Expanded(
+                    child: GoldPricesCard(prices: summary.goldPrices),
+                  ),
+                ],
+              ),
+              SizedBox(height: spacing),
+
+              // Recent operations
+              RecentOperationsCard(operations: summary.recentOperations),
+            ],
+          ), // Column
+        ), // ResponsiveContainer
+      ), // SingleChildScrollView
+    ); // RefreshIndicator
   }
 
   Widget _buildOfflineIndicator(DateTime lastUpdate) {

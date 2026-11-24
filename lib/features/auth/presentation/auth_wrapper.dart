@@ -92,7 +92,6 @@ class AuthWrapper extends StatelessWidget {
 
   /// Navigate to approval details
   void _navigateToApproval(BuildContext context, String approvalId) {
-    // TODO: Implement navigation to approval details
     Navigator.pushNamed(
       context,
       '/approvals/$approvalId',
@@ -102,7 +101,6 @@ class AuthWrapper extends StatelessWidget {
 
   /// Navigate to sale details
   void _navigateToSale(BuildContext context, String saleId) {
-    // TODO: Implement navigation to sale details
     Navigator.pushNamed(
       context,
       '/sales/$saleId',
@@ -112,7 +110,6 @@ class AuthWrapper extends StatelessWidget {
 
   /// Navigate to installment details
   void _navigateToInstallment(BuildContext context, String installmentId) {
-    // TODO: Implement navigation to installment details
     Navigator.pushNamed(
       context,
       '/installments/$installmentId',
@@ -122,7 +119,6 @@ class AuthWrapper extends StatelessWidget {
 
   /// Navigate to return details
   void _navigateToReturn(BuildContext context, String returnId) {
-    // TODO: Implement navigation to return details
     Navigator.pushNamed(
       context,
       '/returns/$returnId',

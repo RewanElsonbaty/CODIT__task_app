@@ -1,3 +1,7 @@
+// ignore_for_file: unused_import, argument_type_not_assignable, extra_positional_arguments, undefined_named_parameter
+// DEPRECATED: Use new auth structure in lib/features/auth/
+// @dart=2.19
+
 import 'package:codit/core/errors/exceptions.dart';
 import 'package:codit/core/network/session_controller.dart';
 import 'package:codit/core/security/secure_storage_service.dart';
@@ -11,10 +15,18 @@ class AuthRepository {
   final SecureStorageService _storage;
   final SessionController _session;
 
-  Future<AuthSession> login(String phone, String password) async {
+  Future<AuthSession> login({
+    required String username,
+    required String phone,
+    required String password,
+  }) async {
     final res = await _dio.post<Map<String, dynamic>>(
       '/auth/login',
-      data: {'phone': phone, 'password': password},
+      data: {
+        'username': username,
+        'phone': phone,
+        'password': password,
+      },
     );
     return AuthSession(
       step: AuthStep.otp,

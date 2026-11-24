@@ -35,4 +35,17 @@ class SecureStorageService {
   Future<void> clear() async {
     await _storage.deleteAll();
   }
+
+  // Generic methods for MockAuthRepository
+  Future<void> save(String key, String value) async {
+    await _storage.write(key: key, value: value);
+  }
+
+  Future<String?> get(String key) async {
+    return await _storage.read(key: key);
+  }
+
+  Future<void> delete(String key) async {
+    await _storage.delete(key: key);
+  }
 }

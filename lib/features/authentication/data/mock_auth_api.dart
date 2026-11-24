@@ -8,19 +8,76 @@ class MockAuthApi {
   final MockApiClient _client = MockApiClient();
   final Random _random = Random();
 
-  // Mock Users Database
+  // Mock Users Database - Static Authentication
+  // Each user has access to ONLY ONE feature
   final Map<String, MockUser> _users = {
+    // User 1: Gold Sales Only
+    'gold_user': MockUser(
+      id: 'user_gold_001',
+      username: 'gold_user',
+      password: 'gold123',
+      role: 'gold_sales_staff',
+      branchId: 'branch_main',
+      fullName: 'محمد أحمد - موظف مبيعات ذهب',
+      permissions: ['gold_sales', 'gold_pos'],
+    ),
+    
+    // User 2: Branches Monitoring Only
+    'branches_user': MockUser(
+      id: 'user_branches_002',
+      username: 'branches_user',
+      password: 'branches123',
+      role: 'branch_monitor',
+      branchId: 'branch_main',
+      fullName: 'سارة علي - مراقب فروع',
+      permissions: ['branches', 'monitoring'],
+    ),
+    
+    // User 3: Approvals Only
+    'approvals_user': MockUser(
+      id: 'user_approvals_003',
+      username: 'approvals_user',
+      password: 'approvals123',
+      role: 'approver',
+      branchId: 'branch_main',
+      fullName: 'خالد محمود - مسؤول موافقات',
+      permissions: ['approvals', 'approval_management'],
+    ),
+    
+    // User 4: Installments Only
+    'installments_user': MockUser(
+      id: 'user_installments_004',
+      username: 'installments_user',
+      password: 'installments123',
+      role: 'installments_officer',
+      branchId: 'branch_main',
+      fullName: 'نور حسن - مسؤول أقساط',
+      permissions: ['installments', 'payments'],
+    ),
+    
+    // Admin: Full Access (for testing)
+    'admin': MockUser(
+      id: 'user_admin_005',
+      username: 'admin',
+      password: 'admin123',
+      role: 'admin',
+      branchId: 'branch_main',
+      fullName: 'أحمد محمد - مدير النظام',
+      permissions: ['all'],
+    ),
+    
+    // Legacy email-based users (backward compatibility)
     'admin@codit.gold': MockUser(
       id: 'user_001',
       username: 'admin@codit.gold',
-      password: 'Admin@123', // في الحقيقة يجب أن يكون hash
+      password: 'Admin@123',
       role: 'admin',
       branchId: 'branch_main',
       fullName: 'أحمد محمد',
       permissions: ['all'],
     ),
     'manager@codit.gold': MockUser(
-      id: 'user_002',
+      id: 'user_003',
       username: 'manager@codit.gold',
       password: 'Manager@123',
       role: 'branch_manager',
@@ -29,7 +86,7 @@ class MockAuthApi {
       permissions: ['sales', 'installments', 'approvals', 'monitoring'],
     ),
     'cashier@codit.gold': MockUser(
-      id: 'user_003',
+      id: 'user_004',
       username: 'cashier@codit.gold',
       password: 'Cashier@123',
       role: 'cashier',

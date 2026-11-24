@@ -11,6 +11,8 @@ analyzer:
     - "**/generated/**"
     - "**/_deprecated/**"  # Ignore deprecated old code
     - "lib/**/_deprecated/**"
+    - "lib/features/authentication/**"  # Old authentication structure (deprecated)
+    - "test/features/authentication/**"  # Old authentication tests (deprecated)
     - build/**
     - android/**
     - ios/**

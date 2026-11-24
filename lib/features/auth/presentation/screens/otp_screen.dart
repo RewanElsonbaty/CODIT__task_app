@@ -2,6 +2,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:device_info_plus/device_info_plus.dart';
+import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import '../auth_cubit.dart';
 
 /// OTP verification screen with 6-digit code input
@@ -27,11 +30,59 @@ class _OtpScreenState extends State<OtpScreen> {
   Timer? _timer;
   int _remainingSeconds = 30;
   bool _canResend = false;
+  
+  // Device info
+  String _deviceId = '';
 
   @override
   void initState() {
     super.initState();
     _startTimer();
+    _initializeDeviceInfo();
+  }
+
+  /// Initialize device info
+  Future<void> _initializeDeviceInfo() async {
+    try {
+      final deviceInfo = DeviceInfoPlugin();
+
+      if (kIsWeb) {
+        final webInfo = await deviceInfo.webBrowserInfo;
+        setState(() {
+          _deviceId = webInfo.userAgent.hashCode.toString();
+        });
+      } else if (Platform.isAndroid) {
+        final androidInfo = await deviceInfo.androidInfo;
+        setState(() {
+          _deviceId = androidInfo.id;
+        });
+      } else if (Platform.isIOS) {
+        final iosInfo = await deviceInfo.iosInfo;
+        setState(() {
+          _deviceId = iosInfo.identifierForVendor ?? 'unknown';
+        });
+      } else if (Platform.isWindows) {
+        final windowsInfo = await deviceInfo.windowsInfo;
+        setState(() {
+          _deviceId = windowsInfo.deviceId;
+        });
+      } else if (Platform.isLinux) {
+        final linuxInfo = await deviceInfo.linuxInfo;
+        setState(() {
+          _deviceId = linuxInfo.machineId ?? 'unknown';
+        });
+      } else if (Platform.isMacOS) {
+        final macosInfo = await deviceInfo.macOsInfo;
+        setState(() {
+          _deviceId = macosInfo.systemGUID ?? 'unknown';
+        });
+      }
+    } catch (e) {
+      debugPrint('Error getting device info: $e');
+      setState(() {
+        _deviceId = 'unknown';
+      });
+    }
   }
 
   @override
@@ -373,7 +424,7 @@ class _OtpScreenState extends State<OtpScreen> {
     context.read<AuthCubit>().verifyOtp(
           sessionId: widget.sessionId,
           otp: otp,
-          deviceId: 'device_123', // TODO: Get actual device ID
+          deviceId: _deviceId.isNotEmpty ? _deviceId : 'unknown',
         );
   }
 }

@@ -1,3 +1,4 @@
+// ignore_for_file: unused_import, unused_field, unused_local_variable, unused_element
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_colors.dart';

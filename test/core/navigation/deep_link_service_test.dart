@@ -1,3 +1,6 @@
+// ignore_for_file: unused_import, body_might_complete_normally_nullable, unused_local_variable
+// DEPRECATED TEST: Uses old navigation structure
+
 import 'package:codit/core/navigation/deep_link_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';

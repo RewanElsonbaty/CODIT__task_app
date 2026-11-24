@@ -1,8 +1,7 @@
-import 'package:codit/features/authentication/domain/auth_session.dart';
-import 'package:codit/features/authentication/presentation/authentication_cubit.dart';
-import 'package:codit/features/authentication/presentation/device_verify_page.dart';
-import 'package:codit/features/authentication/presentation/login_page.dart';
-import 'package:codit/features/authentication/presentation/otp_page.dart';
+import 'package:codit/features/auth/presentation/auth_cubit.dart';
+import 'package:codit/features/auth/presentation/screens/login_screen.dart';
+import 'package:codit/features/auth/presentation/screens/otp_screen.dart';
+import 'package:codit/features/auth/presentation/screens/device_verification_screen.dart';
 import 'package:codit/features/gold_sales/presentation/gold_sale_page.dart';
 import 'package:codit/features/notifications/presentation/pages/notifications_page.dart';
 import 'package:codit/features/approvals/presentation/approvals_page.dart';
@@ -17,7 +16,7 @@ import 'package:go_router/go_router.dart';
 /// Router - opens directly to login
 ///
 /// No splash screen - instant access to login
-GoRouter buildRouter(AuthenticationCubit authCubit) {
+GoRouter buildRouter(AuthCubit authCubit) {
   return GoRouter(
     initialLocation: '/login',
     debugLogDiagnostics: true,
@@ -41,7 +40,6 @@ GoRouter buildRouter(AuthenticationCubit authCubit) {
     ),
     redirect: (context, state) {
       final authState = authCubit.state;
-      final session = authCubit.session;
       final loc = state.matchedLocation;
 
       final isAuthRoute =
@@ -49,40 +47,75 @@ GoRouter buildRouter(AuthenticationCubit authCubit) {
           loc.startsWith('/otp') ||
           loc.startsWith('/device');
 
+      // If there's an error and not on auth route, go to login
       if (authState is AuthError && !isAuthRoute) return '/login';
 
-      if (!session.isAuthenticated) {
-        if (session.step == AuthStep.otp && loc != '/otp') return '/otp';
-        if (session.step == AuthStep.device && loc != '/device') {
-          return '/device';
-        }
-        if (!isAuthRoute) return '/login';
-        return null;
+      // Handle different auth states
+      if (authState is AuthOtpRequired && loc != '/otp') {
+        return '/otp';
       }
 
-      if (isAuthRoute) return '/home';
+      if (authState is AuthDeviceVerificationRequired && loc != '/device') {
+        return '/device';
+      }
+
+      // If not authenticated and not on auth route, go to login
+      if (authState is! AuthAuthenticated && !isAuthRoute) {
+        return '/login';
+      }
+
+      // If authenticated and on auth route, go to home
+      if (authState is AuthAuthenticated && isAuthRoute) {
+        return '/home';
+      }
+
       return null;
     },
     routes: [
       // Auth Routes - Direct to login
-      GoRoute(path: '/login', builder: (_, _) => const LoginPage()),
-      GoRoute(path: '/otp', builder: (_, _) => const OtpPage()),
-      GoRoute(path: '/device', builder: (_, _) => const DeviceVerifyPage()),
+      GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
+      GoRoute(
+        path: '/otp',
+        builder: (_, state) {
+          final authState = authCubit.state;
+          if (authState is AuthOtpRequired) {
+            return OtpScreen(
+              sessionId: authState.sessionId,
+              phone: authState.phone,
+            );
+          }
+          // Fallback if accessed directly
+          return const LoginScreen();
+        },
+      ),
+      GoRoute(
+        path: '/device',
+        builder: (_, state) {
+          final authState = authCubit.state;
+          if (authState is AuthDeviceVerificationRequired) {
+            return DeviceVerificationScreen(
+              verificationId: authState.deviceVerificationId,
+            );
+          }
+          // Fallback if accessed directly
+          return const LoginScreen();
+        },
+      ),
 
       // Main Routes
-      GoRoute(path: '/home', builder: (_, _) => const _HomePage()),
+      GoRoute(path: '/home', builder: (_, __) => const _HomePage()),
       GoRoute(
         path: '/notifications',
-        builder: (_, _) => const NotificationsPage(),
+        builder: (_, __) => const NotificationsPage(),
       ),
 
       // Gold Sales
-      GoRoute(path: '/gold', builder: (_, _) => const GoldSalePage()),
+      GoRoute(path: '/gold', builder: (_, __) => const GoldSalePage()),
 
       // Approvals
       GoRoute(
         path: '/approvals',
-        builder: (_, _) => const ApprovalsPage(),
+        builder: (_, __) => const ApprovalsPage(),
       ),
       GoRoute(
         path: '/approvals/:id',
@@ -111,21 +144,21 @@ GoRouter buildRouter(AuthenticationCubit authCubit) {
       // Installments
       GoRoute(
         path: '/installments',
-        builder: (_, _) => const InstallmentsSimplePage(),
+        builder: (_, __) => const InstallmentsSimplePage(),
       ),
 
       // Branch Monitoring
       GoRoute(
         path: '/branches',
-        builder: (_, _) => const BranchesSimplePage(),
+        builder: (_, __) => const BranchesSimplePage(),
       ),
 
       // Dev Tools
       GoRoute(
         path: '/dev/scenarios',
-        builder: (_, _) => const ScenarioPanelPage(),
+        builder: (_, __) => const ScenarioPanelPage(),
       ),
-      GoRoute(path: '/dev/fonts', builder: (_, _) => const FontTestWidget()),
+      GoRoute(path: '/dev/fonts', builder: (_, __) => const FontTestWidget()),
     ],
   );
 }
@@ -134,7 +167,7 @@ class _AuthRefresh extends ChangeNotifier {
   _AuthRefresh(this._cubit) {
     _cubit.stream.listen((_) => notifyListeners());
   }
-  final AuthenticationCubit _cubit;
+  final AuthCubit _cubit;
 }
 
 /// Simple home page placeholder
@@ -186,45 +219,6 @@ class _HomePage extends StatelessWidget {
             ElevatedButton(
               onPressed: () => context.go('/notifications'),
               child: const Text('Notifications'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Placeholder page for modules under development
-class _PlaceholderPage extends StatelessWidget {
-  final String title;
-  final String? subtitle;
-
-  const _PlaceholderPage({required this.title, this.subtitle});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.construction, size: 64),
-            const SizedBox(height: 16),
-            Text(
-              title,
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            if (subtitle != null) ...[
-              const SizedBox(height: 8),
-              Text(subtitle!),
-            ],
-            const SizedBox(height: 16),
-            const Text('Screen under development'),
-            const SizedBox(height: 32),
-            ElevatedButton(
-              onPressed: () => context.go('/home'),
-              child: const Text('Back to Home'),
             ),
           ],
         ),

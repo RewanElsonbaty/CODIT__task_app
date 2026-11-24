@@ -598,7 +598,7 @@ as String?,
 /// @nodoc
 mixin _$LoginRequest {
 
- String get phone; String get password; String? get deviceId; String? get deviceName;
+ String get username; String get phone; String get password; String? get deviceId; String? get deviceName;
 /// Create a copy of LoginRequest
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -612,20 +612,20 @@ $LoginRequestCopyWith<LoginRequest> get copyWith => _$LoginRequestCopyWithImpl<L
 @override
 bool operator ==(Object other) {
   final _this = this as LoginRequest;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is LoginRequest&&(identical(other.phone, _this.phone) || other.phone == _this.phone)&&(identical(other.password, _this.password) || other.password == _this.password)&&(identical(other.deviceId, _this.deviceId) || other.deviceId == _this.deviceId)&&(identical(other.deviceName, _this.deviceName) || other.deviceName == _this.deviceName));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is LoginRequest&&(identical(other.username, _this.username) || other.username == _this.username)&&(identical(other.phone, _this.phone) || other.phone == _this.phone)&&(identical(other.password, _this.password) || other.password == _this.password)&&(identical(other.deviceId, _this.deviceId) || other.deviceId == _this.deviceId)&&(identical(other.deviceName, _this.deviceName) || other.deviceName == _this.deviceName));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as LoginRequest;
-  return Object.hash(runtimeType,_this.phone,_this.password,_this.deviceId,_this.deviceName);
+  return Object.hash(runtimeType,_this.username,_this.phone,_this.password,_this.deviceId,_this.deviceName);
 }
 
 @override
 String toString() {
   final _this = this as LoginRequest;
-  return 'LoginRequest(phone: ${_this.phone}, password: ${_this.password}, deviceId: ${_this.deviceId}, deviceName: ${_this.deviceName})';
+  return 'LoginRequest(username: ${_this.username}, phone: ${_this.phone}, password: ${_this.password}, deviceId: ${_this.deviceId}, deviceName: ${_this.deviceName})';
 }
 
 
@@ -636,7 +636,7 @@ abstract mixin class $LoginRequestCopyWith<$Res>  {
   factory $LoginRequestCopyWith(LoginRequest value, $Res Function(LoginRequest) _then) = _$LoginRequestCopyWithImpl;
 @useResult
 $Res call({
- String phone, String password, String? deviceId, String? deviceName
+ String username, String phone, String password, String? deviceId, String? deviceName
 });
 
 
@@ -653,9 +653,10 @@ class _$LoginRequestCopyWithImpl<$Res>
 
 /// Create a copy of LoginRequest
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? phone = null,Object? password = null,Object? deviceId = freezed,Object? deviceName = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? username = null,Object? phone = null,Object? password = null,Object? deviceId = freezed,Object? deviceName = freezed,}) {
   return _then(LoginRequest(
-phone: null == phone ? _self.phone : phone // ignore: cast_nullable_to_non_nullable
+username: null == username ? _self.username : username // ignore: cast_nullable_to_non_nullable
+as String,phone: null == phone ? _self.phone : phone // ignore: cast_nullable_to_non_nullable
 as String,password: null == password ? _self.password : password // ignore: cast_nullable_to_non_nullable
 as String,deviceId: freezed == deviceId ? _self.deviceId : deviceId // ignore: cast_nullable_to_non_nullable
 as String?,deviceName: freezed == deviceName ? _self.deviceName : deviceName // ignore: cast_nullable_to_non_nullable
@@ -744,10 +745,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String phone,  String password,  String? deviceId,  String? deviceName)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String username,  String phone,  String password,  String? deviceId,  String? deviceName)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _LoginRequest() when $default != null:
-return $default(_that.phone,_that.password,_that.deviceId,_that.deviceName);case _:
+return $default(_that.username,_that.phone,_that.password,_that.deviceId,_that.deviceName);case _:
   return orElse();
 
 }
@@ -765,10 +766,10 @@ return $default(_that.phone,_that.password,_that.deviceId,_that.deviceName);case
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String phone,  String password,  String? deviceId,  String? deviceName)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String username,  String phone,  String password,  String? deviceId,  String? deviceName)  $default,) {final _that = this;
 switch (_that) {
 case _LoginRequest():
-return $default(_that.phone,_that.password,_that.deviceId,_that.deviceName);case _:
+return $default(_that.username,_that.phone,_that.password,_that.deviceId,_that.deviceName);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -785,10 +786,10 @@ return $default(_that.phone,_that.password,_that.deviceId,_that.deviceName);case
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String phone,  String password,  String? deviceId,  String? deviceName)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String username,  String phone,  String password,  String? deviceId,  String? deviceName)?  $default,) {final _that = this;
 switch (_that) {
 case _LoginRequest() when $default != null:
-return $default(_that.phone,_that.password,_that.deviceId,_that.deviceName);case _:
+return $default(_that.username,_that.phone,_that.password,_that.deviceId,_that.deviceName);case _:
   return null;
 
 }
@@ -800,9 +801,10 @@ return $default(_that.phone,_that.password,_that.deviceId,_that.deviceName);case
 @JsonSerializable()
 
 class _LoginRequest implements LoginRequest {
-  const _LoginRequest({required this.phone, required this.password, this.deviceId, this.deviceName});
+  const _LoginRequest({required this.username, required this.phone, required this.password, this.deviceId, this.deviceName});
   factory _LoginRequest.fromJson(Map<String, dynamic> json) => _$LoginRequestFromJson(json);
 
+@override final  String username;
 @override final  String phone;
 @override final  String password;
 @override final  String? deviceId;
@@ -821,18 +823,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _LoginRequest&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.password, password) || other.password == password)&&(identical(other.deviceId, deviceId) || other.deviceId == deviceId)&&(identical(other.deviceName, deviceName) || other.deviceName == deviceName));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _LoginRequest&&(identical(other.username, username) || other.username == username)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.password, password) || other.password == password)&&(identical(other.deviceId, deviceId) || other.deviceId == deviceId)&&(identical(other.deviceName, deviceName) || other.deviceName == deviceName));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,phone,password,deviceId,deviceName);
+    return Object.hash(runtimeType,username,phone,password,deviceId,deviceName);
 }
 
 @override
 String toString() {
-    return 'LoginRequest(phone: $phone, password: $password, deviceId: $deviceId, deviceName: $deviceName)';
+    return 'LoginRequest(username: $username, phone: $phone, password: $password, deviceId: $deviceId, deviceName: $deviceName)';
 }
 
 
@@ -843,7 +845,7 @@ abstract mixin class _$LoginRequestCopyWith<$Res> implements $LoginRequestCopyWi
   factory _$LoginRequestCopyWith(_LoginRequest value, $Res Function(_LoginRequest) _then) = __$LoginRequestCopyWithImpl;
 @override @useResult
 $Res call({
- String phone, String password, String? deviceId, String? deviceName
+ String username, String phone, String password, String? deviceId, String? deviceName
 });
 
 
@@ -860,9 +862,10 @@ class __$LoginRequestCopyWithImpl<$Res>
 
 /// Create a copy of LoginRequest
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? phone = null,Object? password = null,Object? deviceId = freezed,Object? deviceName = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? username = null,Object? phone = null,Object? password = null,Object? deviceId = freezed,Object? deviceName = freezed,}) {
   return _then(_LoginRequest(
-phone: null == phone ? _self.phone : phone // ignore: cast_nullable_to_non_nullable
+username: null == username ? _self.username : username // ignore: cast_nullable_to_non_nullable
+as String,phone: null == phone ? _self.phone : phone // ignore: cast_nullable_to_non_nullable
 as String,password: null == password ? _self.password : password // ignore: cast_nullable_to_non_nullable
 as String,deviceId: freezed == deviceId ? _self.deviceId : deviceId // ignore: cast_nullable_to_non_nullable
 as String?,deviceName: freezed == deviceName ? _self.deviceName : deviceName // ignore: cast_nullable_to_non_nullable
@@ -877,7 +880,7 @@ as String?,
 /// @nodoc
 mixin _$LoginResponse {
 
- bool get requiresOtp; bool get requiresDeviceVerification; String? get sessionId; AuthTokens? get tokens; AuthUser? get user;
+ bool get requiresOtp; bool get requiresDeviceVerification; String? get sessionId; String? get deviceVerificationId; AuthTokens? get tokens; AuthUser? get user;
 /// Create a copy of LoginResponse
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -891,20 +894,20 @@ $LoginResponseCopyWith<LoginResponse> get copyWith => _$LoginResponseCopyWithImp
 @override
 bool operator ==(Object other) {
   final _this = this as LoginResponse;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is LoginResponse&&(identical(other.requiresOtp, _this.requiresOtp) || other.requiresOtp == _this.requiresOtp)&&(identical(other.requiresDeviceVerification, _this.requiresDeviceVerification) || other.requiresDeviceVerification == _this.requiresDeviceVerification)&&(identical(other.sessionId, _this.sessionId) || other.sessionId == _this.sessionId)&&(identical(other.tokens, _this.tokens) || other.tokens == _this.tokens)&&(identical(other.user, _this.user) || other.user == _this.user));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is LoginResponse&&(identical(other.requiresOtp, _this.requiresOtp) || other.requiresOtp == _this.requiresOtp)&&(identical(other.requiresDeviceVerification, _this.requiresDeviceVerification) || other.requiresDeviceVerification == _this.requiresDeviceVerification)&&(identical(other.sessionId, _this.sessionId) || other.sessionId == _this.sessionId)&&(identical(other.deviceVerificationId, _this.deviceVerificationId) || other.deviceVerificationId == _this.deviceVerificationId)&&(identical(other.tokens, _this.tokens) || other.tokens == _this.tokens)&&(identical(other.user, _this.user) || other.user == _this.user));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as LoginResponse;
-  return Object.hash(runtimeType,_this.requiresOtp,_this.requiresDeviceVerification,_this.sessionId,_this.tokens,_this.user);
+  return Object.hash(runtimeType,_this.requiresOtp,_this.requiresDeviceVerification,_this.sessionId,_this.deviceVerificationId,_this.tokens,_this.user);
 }
 
 @override
 String toString() {
   final _this = this as LoginResponse;
-  return 'LoginResponse(requiresOtp: ${_this.requiresOtp}, requiresDeviceVerification: ${_this.requiresDeviceVerification}, sessionId: ${_this.sessionId}, tokens: ${_this.tokens}, user: ${_this.user})';
+  return 'LoginResponse(requiresOtp: ${_this.requiresOtp}, requiresDeviceVerification: ${_this.requiresDeviceVerification}, sessionId: ${_this.sessionId}, deviceVerificationId: ${_this.deviceVerificationId}, tokens: ${_this.tokens}, user: ${_this.user})';
 }
 
 
@@ -915,7 +918,7 @@ abstract mixin class $LoginResponseCopyWith<$Res>  {
   factory $LoginResponseCopyWith(LoginResponse value, $Res Function(LoginResponse) _then) = _$LoginResponseCopyWithImpl;
 @useResult
 $Res call({
- bool requiresOtp, bool requiresDeviceVerification, String? sessionId, AuthTokens? tokens, AuthUser? user
+ bool requiresOtp, bool requiresDeviceVerification, String? sessionId, String? deviceVerificationId, AuthTokens? tokens, AuthUser? user
 });
 
 
@@ -932,11 +935,12 @@ class _$LoginResponseCopyWithImpl<$Res>
 
 /// Create a copy of LoginResponse
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? requiresOtp = null,Object? requiresDeviceVerification = null,Object? sessionId = freezed,Object? tokens = freezed,Object? user = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? requiresOtp = null,Object? requiresDeviceVerification = null,Object? sessionId = freezed,Object? deviceVerificationId = freezed,Object? tokens = freezed,Object? user = freezed,}) {
   return _then(LoginResponse(
 requiresOtp: null == requiresOtp ? _self.requiresOtp : requiresOtp // ignore: cast_nullable_to_non_nullable
 as bool,requiresDeviceVerification: null == requiresDeviceVerification ? _self.requiresDeviceVerification : requiresDeviceVerification // ignore: cast_nullable_to_non_nullable
 as bool,sessionId: freezed == sessionId ? _self.sessionId : sessionId // ignore: cast_nullable_to_non_nullable
+as String?,deviceVerificationId: freezed == deviceVerificationId ? _self.deviceVerificationId : deviceVerificationId // ignore: cast_nullable_to_non_nullable
 as String?,tokens: freezed == tokens ? _self.tokens : tokens // ignore: cast_nullable_to_non_nullable
 as AuthTokens?,user: freezed == user ? _self.user : user // ignore: cast_nullable_to_non_nullable
 as AuthUser?,
@@ -1048,10 +1052,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool requiresOtp,  bool requiresDeviceVerification,  String? sessionId,  AuthTokens? tokens,  AuthUser? user)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool requiresOtp,  bool requiresDeviceVerification,  String? sessionId,  String? deviceVerificationId,  AuthTokens? tokens,  AuthUser? user)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _LoginResponse() when $default != null:
-return $default(_that.requiresOtp,_that.requiresDeviceVerification,_that.sessionId,_that.tokens,_that.user);case _:
+return $default(_that.requiresOtp,_that.requiresDeviceVerification,_that.sessionId,_that.deviceVerificationId,_that.tokens,_that.user);case _:
   return orElse();
 
 }
@@ -1069,10 +1073,10 @@ return $default(_that.requiresOtp,_that.requiresDeviceVerification,_that.session
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool requiresOtp,  bool requiresDeviceVerification,  String? sessionId,  AuthTokens? tokens,  AuthUser? user)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool requiresOtp,  bool requiresDeviceVerification,  String? sessionId,  String? deviceVerificationId,  AuthTokens? tokens,  AuthUser? user)  $default,) {final _that = this;
 switch (_that) {
 case _LoginResponse():
-return $default(_that.requiresOtp,_that.requiresDeviceVerification,_that.sessionId,_that.tokens,_that.user);case _:
+return $default(_that.requiresOtp,_that.requiresDeviceVerification,_that.sessionId,_that.deviceVerificationId,_that.tokens,_that.user);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1089,10 +1093,10 @@ return $default(_that.requiresOtp,_that.requiresDeviceVerification,_that.session
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool requiresOtp,  bool requiresDeviceVerification,  String? sessionId,  AuthTokens? tokens,  AuthUser? user)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool requiresOtp,  bool requiresDeviceVerification,  String? sessionId,  String? deviceVerificationId,  AuthTokens? tokens,  AuthUser? user)?  $default,) {final _that = this;
 switch (_that) {
 case _LoginResponse() when $default != null:
-return $default(_that.requiresOtp,_that.requiresDeviceVerification,_that.sessionId,_that.tokens,_that.user);case _:
+return $default(_that.requiresOtp,_that.requiresDeviceVerification,_that.sessionId,_that.deviceVerificationId,_that.tokens,_that.user);case _:
   return null;
 
 }
@@ -1104,12 +1108,13 @@ return $default(_that.requiresOtp,_that.requiresDeviceVerification,_that.session
 @JsonSerializable()
 
 class _LoginResponse implements LoginResponse {
-  const _LoginResponse({required this.requiresOtp, required this.requiresDeviceVerification, this.sessionId, this.tokens, this.user});
+  const _LoginResponse({required this.requiresOtp, required this.requiresDeviceVerification, this.sessionId, this.deviceVerificationId, this.tokens, this.user});
   factory _LoginResponse.fromJson(Map<String, dynamic> json) => _$LoginResponseFromJson(json);
 
 @override final  bool requiresOtp;
 @override final  bool requiresDeviceVerification;
 @override final  String? sessionId;
+@override final  String? deviceVerificationId;
 @override final  AuthTokens? tokens;
 @override final  AuthUser? user;
 
@@ -1126,18 +1131,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _LoginResponse&&(identical(other.requiresOtp, requiresOtp) || other.requiresOtp == requiresOtp)&&(identical(other.requiresDeviceVerification, requiresDeviceVerification) || other.requiresDeviceVerification == requiresDeviceVerification)&&(identical(other.sessionId, sessionId) || other.sessionId == sessionId)&&(identical(other.tokens, tokens) || other.tokens == tokens)&&(identical(other.user, user) || other.user == user));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _LoginResponse&&(identical(other.requiresOtp, requiresOtp) || other.requiresOtp == requiresOtp)&&(identical(other.requiresDeviceVerification, requiresDeviceVerification) || other.requiresDeviceVerification == requiresDeviceVerification)&&(identical(other.sessionId, sessionId) || other.sessionId == sessionId)&&(identical(other.deviceVerificationId, deviceVerificationId) || other.deviceVerificationId == deviceVerificationId)&&(identical(other.tokens, tokens) || other.tokens == tokens)&&(identical(other.user, user) || other.user == user));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,requiresOtp,requiresDeviceVerification,sessionId,tokens,user);
+    return Object.hash(runtimeType,requiresOtp,requiresDeviceVerification,sessionId,deviceVerificationId,tokens,user);
 }
 
 @override
 String toString() {
-    return 'LoginResponse(requiresOtp: $requiresOtp, requiresDeviceVerification: $requiresDeviceVerification, sessionId: $sessionId, tokens: $tokens, user: $user)';
+    return 'LoginResponse(requiresOtp: $requiresOtp, requiresDeviceVerification: $requiresDeviceVerification, sessionId: $sessionId, deviceVerificationId: $deviceVerificationId, tokens: $tokens, user: $user)';
 }
 
 
@@ -1148,7 +1153,7 @@ abstract mixin class _$LoginResponseCopyWith<$Res> implements $LoginResponseCopy
   factory _$LoginResponseCopyWith(_LoginResponse value, $Res Function(_LoginResponse) _then) = __$LoginResponseCopyWithImpl;
 @override @useResult
 $Res call({
- bool requiresOtp, bool requiresDeviceVerification, String? sessionId, AuthTokens? tokens, AuthUser? user
+ bool requiresOtp, bool requiresDeviceVerification, String? sessionId, String? deviceVerificationId, AuthTokens? tokens, AuthUser? user
 });
 
 
@@ -1165,11 +1170,12 @@ class __$LoginResponseCopyWithImpl<$Res>
 
 /// Create a copy of LoginResponse
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? requiresOtp = null,Object? requiresDeviceVerification = null,Object? sessionId = freezed,Object? tokens = freezed,Object? user = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? requiresOtp = null,Object? requiresDeviceVerification = null,Object? sessionId = freezed,Object? deviceVerificationId = freezed,Object? tokens = freezed,Object? user = freezed,}) {
   return _then(_LoginResponse(
 requiresOtp: null == requiresOtp ? _self.requiresOtp : requiresOtp // ignore: cast_nullable_to_non_nullable
 as bool,requiresDeviceVerification: null == requiresDeviceVerification ? _self.requiresDeviceVerification : requiresDeviceVerification // ignore: cast_nullable_to_non_nullable
 as bool,sessionId: freezed == sessionId ? _self.sessionId : sessionId // ignore: cast_nullable_to_non_nullable
+as String?,deviceVerificationId: freezed == deviceVerificationId ? _self.deviceVerificationId : deviceVerificationId // ignore: cast_nullable_to_non_nullable
 as String?,tokens: freezed == tokens ? _self.tokens : tokens // ignore: cast_nullable_to_non_nullable
 as AuthTokens?,user: freezed == user ? _self.user : user // ignore: cast_nullable_to_non_nullable
 as AuthUser?,

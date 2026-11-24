@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/theme/app_colors.dart';
-import '../../../core/utils/responsive_utils.dart';
-import '../../../core/di/injection.dart';
-import '../../../core/data/mock_gold_sales_api.dart';
-import '../domain/gold_models.dart';
-import 'gold_sale_cubit.dart';
-import 'widgets/gold_sale_widgets.dart';
+import 'package:codit/core/theme/app_colors.dart';
+import 'package:codit/core/utils/responsive_utils.dart';
+import 'package:codit/core/di/injection.dart';
+import 'package:codit/core/data/mock_gold_sales_api.dart';
+import 'package:codit/features/gold_sales/domain/gold_models.dart';
+import 'package:codit/features/gold_sales/presentation/gold_sale_cubit.dart';
+import 'package:codit/features/gold_sales/presentation/widgets/gold_sale_widgets.dart';
 
 class GoldSalePage extends StatelessWidget {
   const GoldSalePage({super.key});

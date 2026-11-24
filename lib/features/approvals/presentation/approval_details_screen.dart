@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/responsive_utils.dart';
+import '../../../features/auth/presentation/auth_cubit.dart';
 import '../data/mock_approvals_api.dart';
 
 /// شاشة تفاصيل طلب الموافقة
@@ -718,8 +720,13 @@ class _ApprovalDetailsScreenState extends State<ApprovalDetailsScreen> {
   }
 
   Widget _buildActionButtons(bool isMobile) {
-    // TODO: Get actual user ID from auth state
-    const userId = 'user_002';
+    // Get actual user ID from auth state
+    final authState = context.read<AuthCubit>().state;
+    String userId = 'unknown';
+    
+    if (authState is AuthAuthenticated) {
+      userId = authState.user.id;
+    }
 
     return Container(
       padding: EdgeInsets.all(ResponsiveUtils.spacing(context)),
