@@ -55,15 +55,37 @@ class MockAuthApi {
       permissions: ['installments', 'payments'],
     ),
     
-    // Admin: Full Access (for testing)
+    // Admin/Owner: Full Access (for testing)
     'admin': MockUser(
       id: 'user_admin_005',
       username: 'admin',
       password: 'admin123',
-      role: 'admin',
+      role: 'owner',
       branchId: 'branch_main',
-      fullName: 'أحمد محمد - مدير النظام',
+      fullName: 'أحمد محمد - مالك النظام',
       permissions: ['all'],
+    ),
+    
+    // Manager: Approvals + Staff Management (his team only)
+    'manager': MockUser(
+      id: 'user_manager_006',
+      username: 'manager',
+      password: 'manager123',
+      role: 'manager',
+      branchId: 'branch_main',
+      fullName: 'خالد أحمد - مدير الفرع',
+      permissions: ['approvals', 'approval_management', 'staff_management', 'staff_reports', 'team_monitoring'],
+    ),
+    
+    // Cashier: Installments POS Only
+    'cashier': MockUser(
+      id: 'user_cashier_007',
+      username: 'cashier',
+      password: 'cashier123',
+      role: 'cashier',
+      branchId: 'branch_main',
+      fullName: 'فاطمة حسن - كاشير',
+      permissions: ['installments', 'payments', 'installments_pos'],
     ),
     
     // Legacy email-based users (backward compatibility)

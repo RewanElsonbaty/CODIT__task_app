@@ -1,326 +1,224 @@
-# 🚀 Quick Start Guide
+# Gold Sales Feature - Quick Start Guide
 
-## التشغيل السريع للمشروع
+## ✅ Status: READY TO RUN
 
-### 1️⃣ تشغيل التطبيق
+All compilation errors have been fixed. The gold sales feature is fully integrated with Mock API and ready for testing.
+
+---
+
+## 🚀 Run the App
+
 ```bash
-# تشغيل على محاكي أو جهاز متصل
+# Navigate to project directory
+cd E:\flutter_projects\CODIT-TASK
+
+# Get dependencies (if needed)
+flutter pub get
+
+# Run on your device/emulator
 flutter run
-
-# تشغيل على جهاز محدد
-flutter run -d <device-id>
-
-# عرض الأجهزة المتاحة
-flutter devices
-```
-
-### 2️⃣ تشغيل الاختبارات
-```bash
-# تشغيل جميع الاختبارات
-flutter test
-
-# تشغيل Gold Calculator Tests (الأهم - 13/13 passing ✅)
-flutter test test/features/gold_sales/gold_calculator_test.dart
-
-# تشغيل Authentication Tests
-flutter test test/features/authentication/auth_critical_test.dart
-
-# تشغيل Approvals Tests
-flutter test test/features/approvals/approvals_critical_test.dart
-
-# تشغيل Installments Tests
-flutter test test/features/installments/installments_critical_test.dart
-
-# تشغيل Branch Monitoring Tests
-flutter test test/features/branch_monitoring/monitoring_critical_test.dart
-
-# تشغيل مع عرض التفاصيل
-flutter test --verbose
-```
-
-### 3️⃣ تنسيق الكود
-```bash
-# تنسيق كل الملفات
-dart format lib/ test/
-
-# تنسيق ملف محدد
-dart format lib/features/gold_sales/domain/gold_calculator.dart
-
-# فحص بدون تعديل
-dart format --output=none lib/
-```
-
-### 4️⃣ تحليل الكود
-```bash
-# تشغيل static analysis
-flutter analyze
-
-# تحليل شامل
-dart analyze
 ```
 
 ---
 
-## 📱 الشاشات المتاحة
+## 🧪 Test the Gold Sales Feature
 
-### Gold POS Screen (✅ Complete)
-للوصول للشاشة من main.dart:
-```dart
-MaterialApp(
-  home: GoldSalePage(), // ✅ جاهزة للاستخدام
-)
-```
+### Step 1: Navigate to Gold Sales
+- Launch the app
+- From the main menu, tap **"بيع الذهب"** (Gold Sales)
 
-**Features:**
-- إضافة منتجات
-- حساب تلقائي
-- إضافة بدل
-- طرق دفع متعددة
-- حفظ مسودة
-- إتمام البيع
+### Step 2: Open Advanced Search Dialog
+- In the gold sales screen, find the **"إضافة قطعة"** section
+- Tap the **"اختيار من القطع المتاحة"** button (blue button with plus icon)
+- Wait for the loading indicator (fetches 25 products from Mock API)
 
----
+### Step 3: Explore Products
+You'll see **25 gold products** organized by:
+- **Karats**: 18, 21, 24
+- **Categories**: خواتم (Rings), سلاسل (Chains), أساور (Bracelets), حلق (Earrings), قلادات (Pendants), أطقم (Sets)
 
-## 🔐 بيانات الاختبار
+### Step 4: Filter Products
+- **By Karat**: Tap the karat chips (18, 21, 24) at the top
+- **By Category**: Select from the dropdown menu
+- **By Search**: Type product name or code in the search bar
+- **Clear Filters**: Tap "مسح الفلاتر" button
 
-### Mock Users
-```
-Username: admin@codit.gold
-Password: Admin@123
-Role: Admin (كل الصلاحيات)
+### Step 5: Select a Product
+- Scroll through the grid of products
+- Each card shows:
+  - Product name and code
+  - Karat (العيار)
+  - Weight (الوزن)
+  - Price per gram (السعر)
+  - Category (التصنيف)
 
-Username: manager@codit.gold
-Password: Manager@123
-Role: Branch Manager
+### Step 6: Set Quantity
+- Use **+/-** buttons to adjust quantity
+- Or type the number directly in the text field
+- Minimum quantity: 1
 
-Username: cashier@codit.gold
-Password: Cashier@123
-Role: Cashier
-```
+### Step 7: Add to Invoice
+Choose one of two buttons:
+- **"إضافة ومتابعة"** (Add & Continue): Adds product and keeps dialog open to add more
+- **"إضافة وإنهاء"** (Add & Finish): Adds product and closes dialog
 
-### Mock Products
-```
-- خاتم ذهب عيار 21 (4.5g)
-- خاتم ذهب عيار 18 (3.5g)
-- سلسلة ذهب عيار 21 (12g)
-- أسورة ذهب عيار 21 (18g)
-- أقراط ذهب عيار 18 (6g)
-```
-
----
-
-## 🧪 Test Case الأساسي
-
-### Gold POS Calculator Test
-```bash
-flutter test test/features/gold_sales/gold_calculator_test.dart
-```
-
-**Input:**
-- Gross Weight: 4500mg (4.5g)
-- Stones Weight: 300mg (0.3g)  
-- Net Weight: 4200mg (4.2g)
-- Price per gram: 4200 EGP
-- Making charge: 120 EGP/gram
-- Discount: 10%
-
-**Expected Output:** 18,157.10 EGP
-**Actual Output:** 18,157.10 EGP ✅
+### Step 8: Verify Product Added
+- Look for the **green SnackBar** at the bottom confirming the addition
+- Check the **"الأصناف"** (Line Items) section to see your added products
+- Each product shows full details including gold value, making charges, tax, and total
 
 ---
 
-## 📊 Mock APIs
+## 🎨 What to Look For
 
-### استخدام Mock APIs في الكود:
+### Visual Features
+✅ **Responsive Design**: Works on mobile, tablet, and desktop
+✅ **Golden Theme**: Luxury gold colors throughout
+✅ **Smooth Animations**: Loading indicators and transitions
+✅ **RTL Support**: Full right-to-left Arabic layout
 
-```dart
-// 1. Authentication
-import 'package:codit/features/authentication/data/mock_auth_api.dart';
-
-final api = MockAuthApi();
-final result = await api.login(
-  username: 'admin@codit.gold',
-  password: 'Admin@123',
-  deviceId: 'device_001',
-);
-
-// 2. Gold Sales
-import 'package:codit/features/gold_sales/data/mock_gold_sales_api.dart';
-
-final api = MockGoldSalesApi();
-final products = await api.getAllProducts();
-
-// 3. Installments
-import 'package:codit/features/installments/data/mock_installments_api.dart';
-
-final api = MockInstallmentsApi();
-final contracts = await api.getOverdueContracts();
-
-// 4. Approvals
-import 'package:codit/features/approvals/data/mock_approvals_api.dart';
-
-final api = MockApprovalsApi();
-final pending = await api.getPendingRequests(userId: 'user_002');
-
-// 5. Branch Monitoring
-import 'package:codit/features/branch_monitoring/data/mock_monitoring_api.dart';
-
-final api = MockMonitoringApi();
-final metrics = await api.getLiveMetrics('branch_main');
-```
+### Functional Features
+✅ **Real-time Filtering**: Instant filter results
+✅ **Search**: Find products by name or code
+✅ **Multiple Quantities**: Add same product multiple times
+✅ **Different Products**: Add various products to one invoice
+✅ **Error Handling**: Empty states and error messages
 
 ---
 
-## 🎨 Theme Usage
+## 📊 Sample Products to Test
 
-### استخدام الألوان:
-```dart
-import 'package:codit/core/theme/app_colors.dart';
+### Rings (خواتم)
+- **RING-001**: خاتم زفاف كلاسيك - 18 karat - 4.5g - 3,200 EGP/g
+- **RING-005**: خاتم فاخر متعدد الأحجار - 24 karat - 8.0g - 150,000 EGP/g
 
-// Primary colors
-AppColors.goldenNeon  // #FFD700
-AppColors.background  // #171514
-AppColors.card        // #2A2725
+### Chains (سلاسل)
+- **CHAIN-001**: سلسلة بيزنطية - 21 karat - 15.0g - 3,800 EGP/g
+- **CHAIN-004**: سلسلة فينيسية - 18 karat - 8.5g - 3,100 EGP/g
 
-// Text colors
-AppColors.textPrimary    // #FFFFFF
-AppColors.textSecondary  // #9CA3AF
+### Bracelets (أساور)
+- **BRAC-001**: إسورة رفيعة - 21 karat - 10.0g - 3,700 EGP/g
+- **BRAC-004**: إسورة مرصعة بالزركون - 24 karat - 20.0g - 4,500 EGP/g
 
-// Status colors
-AppColors.successDark  // Success
-AppColors.errorDark    // Error
-AppColors.warningDark  // Warning
-```
-
-### استخدام Luxury Theme:
-```dart
-import 'package:codit/core/theme/luxury_theme.dart';
-
-MaterialApp(
-  theme: LuxuryTheme.darkTheme,
-  // ...
-)
-```
-
----
-
-## 📱 Responsive Design
-
-### استخدام ResponsiveUtils:
-```dart
-import 'package:codit/core/utils/responsive_utils.dart';
-
-// Check device type
-if (ResponsiveUtils.isMobile(context)) {
-  return MobileLayout();
-} else if (ResponsiveUtils.isTablet(context)) {
-  return TabletLayout();
-} else {
-  return DesktopLayout();
-}
-
-// Adaptive spacing
-final spacing = ResponsiveUtils.spacing(context);
-// Mobile: 16, Tablet: 24, Desktop: 32
-
-// Adaptive font size
-final fontSize = ResponsiveUtils.fontSize(context, base: 14);
-// Mobile: 14, Tablet: 16, Desktop: 18
-```
+### Sets (أطقم)
+- **SET-001**: طقم زفاف كامل - 21 karat - 45.0g - 4,200 EGP/g
+- **SET-002**: طقم فاخر مرصع - 24 karat - 60.0g - 180,000 EGP/g
 
 ---
 
 ## 🔧 Troubleshooting
 
-### مشاكل شائعة وحلولها:
+### Dialog Doesn't Open
+- Check console for errors
+- Verify Mock API is working: `fetchAvailableProducts()` should return 25 products
 
-#### 1. Build fails
+### Products Don't Show
+- Check if filters are applied (clear them with "مسح الفلاتر")
+- Verify Mock data in `lib/core/data/mock_gold_sales_api.dart`
+
+### Product Not Added to Invoice
+- Check if quantity is at least 1
+- Verify SnackBar appears (green for success, red for error)
+- Check console for any errors in `addProduct()` method
+
+### App Won't Build
 ```bash
-# تنظيف ال build
+# Clean and rebuild
 flutter clean
 flutter pub get
 flutter run
 ```
 
-#### 2. Tests fail
-```bash
-# إعادة تنصيب dependencies
-flutter pub get
-flutter test --no-pub
-```
-
-#### 3. Import errors
-```bash
-# التأكد من package name صحيح
-# في pubspec.yaml: name: codit
-# في imports: import 'package:codit/...'
-```
-
-#### 4. Theme issues
-```bash
-# التأكد من استخدام LuxuryTheme.darkTheme
-# في main.dart
-```
-
 ---
 
-## 📂 هيكل المشروع
+## 📁 Key Files
+
+If you need to modify anything:
 
 ```
 lib/
-├── core/               # المكونات المشتركة
-│   ├── data/          # Mock API Client
-│   ├── theme/         # Luxury Theme
-│   └── utils/         # Responsive Utils
+├── core/
+│   └── data/
+│       └── mock_gold_sales_api.dart     # Mock data (25 products)
 │
-└── features/          # الوحدات
-    ├── authentication/    # المصادقة
-    ├── gold_sales/       # نقاط البيع ✅
-    ├── installments/     # الأقساط
-    ├── approvals/        # الموافقات
-    └── branch_monitoring/ # المراقبة
+└── features/gold_sales/
+    ├── domain/
+    │   └── gold_models.dart             # Data models
+    │
+    └── presentation/
+        ├── gold_sale_cubit.dart         # Business logic
+        ├── gold_sale_page.dart          # Main page
+        └── widgets/
+            ├── gold_sale_widgets.dart   # UI widgets (FIXED)
+            └── add_gold_item_dialog.dart # Selection dialog (NEW)
 ```
 
 ---
 
-## 📄 الملفات المهمة
+## 🎯 Test Scenarios
 
-### Documentation
-- `README.md` - نظرة عامة على المشروع
-- `IMPLEMENTATION_SUMMARY.md` - ملخص شامل للتنفيذ
-- `COMPLETION_STATUS.md` - حالة الإنجاز
-- `QUICK_START.md` - هذا الملف
+### Scenario 1: Single Product
+1. Open dialog
+2. Select RING-001
+3. Keep quantity at 1
+4. Click "إضافة وإنهاء"
+5. ✅ Verify product appears in invoice
 
-### Tests
-- `test/features/gold_sales/gold_calculator_test.dart` ✅
-- `test/features/authentication/auth_critical_test.dart` ✅
-- `test/features/approvals/approvals_critical_test.dart` ✅
-- `test/features/installments/installments_critical_test.dart` ✅
-- `test/features/branch_monitoring/monitoring_critical_test.dart` ✅
+### Scenario 2: Multiple Quantities
+1. Open dialog
+2. Select CHAIN-001
+3. Increase quantity to 3
+4. Click "إضافة وإنهاء"
+5. ✅ Verify 3 separate line items appear
+
+### Scenario 3: Mixed Products
+1. Open dialog
+2. Add RING-001 (quantity: 1) → "إضافة ومتابعة"
+3. Add BRAC-002 (quantity: 2) → "إضافة ومتابعة"
+4. Add SET-001 (quantity: 1) → "إضافة وإنهاء"
+5. ✅ Verify 4 total line items (1+2+1)
+
+### Scenario 4: Filtering
+1. Open dialog
+2. Filter by karat: 24
+3. ✅ Should see only 24k products
+4. Filter by category: خواتم
+5. ✅ Should see only rings
+6. Clear filters
+7. ✅ Should see all 25 products again
+
+### Scenario 5: Search
+1. Open dialog
+2. Search: "خاتم"
+3. ✅ Should see only ring products
+4. Search: "CHAIN-001"
+5. ✅ Should see only that specific chain
+6. Clear search
+7. ✅ Should see all products
 
 ---
 
-## ✅ Checklist قبل المراجعة
+## ✨ Success Indicators
 
-- [x] التطبيق يعمل بدون أخطاء
-- [x] جميع tests تعمل
-- [x] الكود منسق (dart format)
-- [x] لا توجد warnings (flutter analyze)
-- [x] Documentation كاملة
-- [x] Gold POS UI كاملة
-- [x] Mock APIs جاهزة
-- [x] Critical Tests جاهزة
-
----
-
-## 📞 Support
-
-إذا واجهت أي مشكلة:
-1. تحقق من هذا الملف
-2. راجع README.md
-3. افحص IMPLEMENTATION_SUMMARY.md
-4. شغل `flutter doctor` للتأكد من البيئة
+You'll know everything is working when:
+- ✅ Dialog opens smoothly with loading indicator
+- ✅ 25 products display in a responsive grid
+- ✅ Filters work instantly without lag
+- ✅ Products can be added multiple times
+- ✅ SnackBars confirm each addition
+- ✅ Invoice updates with correct line items
+- ✅ Totals calculate correctly (gold value + making charge + tax)
 
 ---
 
-**Built with Flutter 💙 | Ready to Review ✅**
+## 📞 Need Help?
+
+Check the documentation:
+- **GOLD_SALES_STATUS.md**: Complete feature status
+- **GOLD_SALES_MOCK_INTEGRATION.md**: API integration details
+- **GOLD_SALE_WIDGETS_FIX.md**: Recent error fixes
+- **GOLD_PRODUCTS_ERRORS_FIXED.md**: Previous error fixes
+
+---
+
+**Happy Testing! 🎉**

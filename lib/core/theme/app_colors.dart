@@ -100,7 +100,7 @@ abstract final class AppColors {
   @Deprecated('Use background instead')
   static const surface = background;
   
-  @Deprecated('Use secondary instead')
+  /// اللون المميز - يستخدم في الأزرار والعناصر المهمة
   static const accent = secondary;
   
   @Deprecated('Use primary instead')

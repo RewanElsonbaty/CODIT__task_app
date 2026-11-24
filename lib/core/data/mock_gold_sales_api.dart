@@ -18,10 +18,10 @@ class MockGoldSalesApi {
 
   /// تهيئة البيانات التجريبية
   void _initializeMockData() {
-    // منتجات تجريبية
+    // منتجات تجريبية متنوعة
     _products.addAll([
-      // خواتم
-      const GoldProduct(
+      // خواتم - عيار 21
+      GoldProduct(
         code: 'RING-001',
         barcode: '1234567890123',
         name: 'خاتم ذهب عيار 21 - موديل كلاسيك',
@@ -29,48 +29,259 @@ class MockGoldSalesApi {
         grossWeightMg: 4500,
         stonesWeightMg: 300,
         status: ProductStatus.available,
+        category: 'خواتم',
+        makingChargePerGram: 50.0,
       ),
-      const GoldProduct(
+      GoldProduct(
         code: 'RING-002',
         barcode: '1234567890124',
+        name: 'خاتم ذهب عيار 21 - موديل إيطالي',
+        karat: Karat.k21,
+        grossWeightMg: 5200,
+        stonesWeightMg: 400,
+        status: ProductStatus.available,
+        category: 'خواتم',
+        makingChargePerGram: 55.0,
+      ),
+      GoldProduct(
+        code: 'RING-003',
+        barcode: '1234567890125',
+        name: 'دبلة زفاف ذهب عيار 21',
+        karat: Karat.k21,
+        grossWeightMg: 6000,
+        stonesWeightMg: 200,
+        status: ProductStatus.available,
+        category: 'خواتم',
+        makingChargePerGram: 60.0,
+      ),
+
+      // خواتم - عيار 18
+      GoldProduct(
+        code: 'RING-004',
+        barcode: '1234567890126',
         name: 'خاتم ذهب عيار 18 - موديل فرنسي',
         karat: Karat.k18,
         grossWeightMg: 3500,
-        stonesWeightMg: 200,
+        stonesWeightMg: 500,
         status: ProductStatus.available,
+        category: 'خواتم',
+        makingChargePerGram: 65.0,
+      ),
+      GoldProduct(
+        code: 'RING-005',
+        barcode: '1234567890127',
+        name: 'خاتم ذهب عيار 18 - مرصع فصوص',
+        karat: Karat.k18,
+        grossWeightMg: 4000,
+        stonesWeightMg: 800,
+        status: ProductStatus.available,
+        category: 'خواتم',
+        makingChargePerGram: 70.0,
       ),
 
-      // سلاسل
-      const GoldProduct(
+      // سلاسل - عيار 21
+      GoldProduct(
         code: 'CHAIN-001',
-        barcode: '1234567890125',
+        barcode: '1234567890128',
         name: 'سلسلة ذهب عيار 21 - 50 سم',
         karat: Karat.k21,
         grossWeightMg: 12000,
         stonesWeightMg: 0,
         status: ProductStatus.available,
+        category: 'سلاسل',
+        makingChargePerGram: 40.0,
+      ),
+      GoldProduct(
+        code: 'CHAIN-002',
+        barcode: '1234567890129',
+        name: 'سلسلة ذهب عيار 21 - 60 سم',
+        karat: Karat.k21,
+        grossWeightMg: 15000,
+        stonesWeightMg: 0,
+        status: ProductStatus.available,
+        category: 'سلاسل',
+        makingChargePerGram: 42.0,
+      ),
+      GoldProduct(
+        code: 'CHAIN-003',
+        barcode: '1234567890130',
+        name: 'سلسلة ذهب عيار 21 - موديل إيطالي',
+        karat: Karat.k21,
+        grossWeightMg: 18000,
+        stonesWeightMg: 0,
+        status: ProductStatus.available,
+        category: 'سلاسل',
+        makingChargePerGram: 45.0,
       ),
 
-      // أساور
-      const GoldProduct(
+      // سلاسل - عيار 24
+      GoldProduct(
+        code: 'CHAIN-004',
+        barcode: '1234567890131',
+        name: 'سلسلة ذهب عيار 24 - كلاسيك',
+        karat: Karat.k24,
+        grossWeightMg: 10000,
+        stonesWeightMg: 0,
+        status: ProductStatus.available,
+        category: 'سلاسل',
+        makingChargePerGram: 35.0,
+      ),
+
+      // أساور - عيار 21
+      GoldProduct(
         code: 'BRAC-001',
-        barcode: '1234567890126',
+        barcode: '1234567890132',
         name: 'أسورة ذهب عيار 21 - موديل إيطالي',
         karat: Karat.k21,
         grossWeightMg: 18000,
         stonesWeightMg: 500,
         status: ProductStatus.available,
+        category: 'أساور',
+        makingChargePerGram: 48.0,
+      ),
+      GoldProduct(
+        code: 'BRAC-002',
+        barcode: '1234567890133',
+        name: 'أسورة ذهب عيار 21 - عريض',
+        karat: Karat.k21,
+        grossWeightMg: 22000,
+        stonesWeightMg: 0,
+        status: ProductStatus.available,
+        category: 'أساور',
+        makingChargePerGram: 45.0,
+      ),
+      GoldProduct(
+        code: 'BRAC-003',
+        barcode: '1234567890134',
+        name: 'أسورة ذهب عيار 21 - موديل هندي',
+        karat: Karat.k21,
+        grossWeightMg: 25000,
+        stonesWeightMg: 1000,
+        status: ProductStatus.available,
+        category: 'أساور',
+        makingChargePerGram: 52.0,
       ),
 
-      // أقراط
-      const GoldProduct(
+      // أساور - عيار 18
+      GoldProduct(
+        code: 'BRAC-004',
+        barcode: '1234567890135',
+        name: 'أسورة ذهب عيار 18 - بفصوص',
+        karat: Karat.k18,
+        grossWeightMg: 15000,
+        stonesWeightMg: 1500,
+        status: ProductStatus.available,
+        category: 'أساور',
+        makingChargePerGram: 60.0,
+      ),
+
+      // أقراط/حلق - عيار 21
+      GoldProduct(
         code: 'EARR-001',
-        barcode: '1234567890127',
+        barcode: '1234567890136',
+        name: 'أقراط ذهب عيار 21 - كلاسيك',
+        karat: Karat.k21,
+        grossWeightMg: 5000,
+        stonesWeightMg: 300,
+        status: ProductStatus.available,
+        category: 'حلق',
+        makingChargePerGram: 55.0,
+      ),
+      GoldProduct(
+        code: 'EARR-002',
+        barcode: '1234567890137',
+        name: 'حلق ذهب عيار 21 - موديل دائري',
+        karat: Karat.k21,
+        grossWeightMg: 7000,
+        stonesWeightMg: 500,
+        status: ProductStatus.available,
+        category: 'حلق',
+        makingChargePerGram: 58.0,
+      ),
+
+      // أقراط/حلق - عيار 18
+      GoldProduct(
+        code: 'EARR-003',
+        barcode: '1234567890138',
         name: 'أقراط ذهب عيار 18 - مرصع ألماس',
         karat: Karat.k18,
         grossWeightMg: 6000,
+        stonesWeightMg: 1000,
+        status: ProductStatus.available,
+        category: 'حلق',
+        makingChargePerGram: 70.0,
+      ),
+      GoldProduct(
+        code: 'EARR-004',
+        barcode: '1234567890139',
+        name: 'حلق ذهب عيار 18 - موديل فرنسي',
+        karat: Karat.k18,
+        grossWeightMg: 4500,
         stonesWeightMg: 800,
         status: ProductStatus.available,
+        category: 'حلق',
+        makingChargePerGram: 68.0,
+      ),
+
+      // قلادات - عيار 21
+      GoldProduct(
+        code: 'PEND-001',
+        barcode: '1234567890140',
+        name: 'قلادة ذهب عيار 21 - كلاسيك',
+        karat: Karat.k21,
+        grossWeightMg: 8000,
+        stonesWeightMg: 500,
+        status: ProductStatus.available,
+        category: 'قلادات',
+        makingChargePerGram: 50.0,
+      ),
+      GoldProduct(
+        code: 'PEND-002',
+        barcode: '1234567890141',
+        name: 'قلادة ذهب عيار 21 - موديل هندي',
+        karat: Karat.k21,
+        grossWeightMg: 10000,
+        stonesWeightMg: 800,
+        status: ProductStatus.available,
+        category: 'قلادات',
+        makingChargePerGram: 55.0,
+      ),
+
+      // قلادات - عيار 18
+      GoldProduct(
+        code: 'PEND-003',
+        barcode: '1234567890142',
+        name: 'قلادة ذهب عيار 18 - بحجر كريم',
+        karat: Karat.k18,
+        grossWeightMg: 12000,
+        stonesWeightMg: 2000,
+        status: ProductStatus.available,
+        category: 'قلادات',
+        makingChargePerGram: 65.0,
+      ),
+
+      // طقم كامل
+      GoldProduct(
+        code: 'SET-001',
+        barcode: '1234567890143',
+        name: 'طقم ذهب عيار 21 (سلسلة + حلق)',
+        karat: Karat.k21,
+        grossWeightMg: 20000,
+        stonesWeightMg: 1000,
+        status: ProductStatus.available,
+        category: 'أطقم',
+        makingChargePerGram: 60.0,
+      ),
+      GoldProduct(
+        code: 'SET-002',
+        barcode: '1234567890144',
+        name: 'طقم ذهب عيار 18 (سلسلة + حلق + خاتم)',
+        karat: Karat.k18,
+        grossWeightMg: 25000,
+        stonesWeightMg: 2000,
+        status: ProductStatus.available,
+        category: 'أطقم',
+        makingChargePerGram: 70.0,
       ),
     ]);
   }

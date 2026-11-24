@@ -3,8 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/responsive_utils.dart';
 import '../../domain/gold_models.dart';
 import '../gold_sale_cubit.dart';
+import 'add_gold_item_dialog.dart';
+import 'progressive_add_gold_dialog.dart';
 
 /// الهيدر - رقم الفاتورة والتاريخ
 class InvoiceHeader extends StatelessWidget {
@@ -141,6 +144,48 @@ class _ProductSearchSectionState extends State<ProductSearchSection> {
 
           const SizedBox(height: 16),
 
+          // زر فتح Dialog البحث المتقدم
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: widget.enabled
+                  ? () => _showAdvancedSearchDialog(context)
+                  : null,
+              icon: const Icon(Icons.add_circle_outline),
+              label: const Text('اختيار من القطع المتاحة'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.goldenNeon,
+                foregroundColor: Colors.black,
+                disabledBackgroundColor: AppColors.border,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ),
+          
+          const SizedBox(height: 12),
+          
+          Row(
+            children: [
+              const Expanded(child: Divider(color: AppColors.border)),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  'أو',
+                  style: TextStyle(
+                    color: AppColors.textSecondary.withOpacity(0.7),
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+              const Expanded(child: Divider(color: AppColors.border)),
+            ],
+          ),
+          
+          const SizedBox(height: 12),
+
           Row(
             children: [
               Expanded(
@@ -178,7 +223,7 @@ class _ProductSearchSectionState extends State<ProductSearchSection> {
                   onSubmitted: widget.enabled
                       ? (value) {
                           if (value.isNotEmpty) {
-                            // TODO: Search and add product
+                            // TODO: Search and add product by code
                             _codeController.clear();
                           }
                         }
@@ -204,6 +249,98 @@ class _ProductSearchSectionState extends State<ProductSearchSection> {
         ],
       ),
     );
+  }
+  
+  void _showAdvancedSearchDialog(BuildContext context) async {
+    // جلب القطع من API
+    final cubit = context.read<GoldSaleCubit>();
+    
+    // عرض loading
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(AppColors.goldenNeon),
+        ),
+      ),
+    );
+    
+    try {
+      // جلب جميع القطع المتاحة من API
+      final products = await cubit.fetchAvailableProducts();
+      
+      if (!context.mounted) return;
+      
+      // إغلاق loading
+      Navigator.of(context).pop();
+      
+      if (products.isEmpty) {
+        // عرض رسالة عدم وجود قطع متاحة
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.info_outline, color: Colors.white),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Text('لا توجد قطع متاحة حالياً'),
+                ),
+              ],
+            ),
+            backgroundColor: AppColors.warningDark,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
+      
+      // فتح dialog الاختيار المتقدم
+      showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (dialogContext) => ProgressiveAddGoldDialog(
+          availableProducts: products,
+          onAddItem: (product, quantity) {
+            // TODO: Get current gold price from API or settings
+            // هنا يجب جلب سعر الذهب الحالي من إعدادات النظام
+            final goldPricePerGram = 3500; // مثال: 3500 جنيه للجرام
+            
+            // إضافة كل قطعة على حدة
+            for (int i = 0; i < quantity; i++) {
+              cubit.addProduct(
+                product: product,
+                pricePerGramPiastres: goldPricePerGram * 100, // تحويل لقرش
+                makingChargeType: MakingChargeType.perGram,
+                makingChargePerGramPiastres: 5000, // 50 جنيه مصنعية للجرام
+              );
+            }
+          },
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      
+      // إغلاق loading إذا كان مفتوح
+      Navigator.of(context).pop();
+      
+      // عرض رسالة خطأ
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.error_outline, color: Colors.white),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text('خطأ في الاتصال: ${e.toString()}'),
+              ),
+            ],
+          ),
+          backgroundColor: AppColors.errorDark,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 }
 

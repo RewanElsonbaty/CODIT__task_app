@@ -15,6 +15,31 @@ class GoldSaleCubit extends Cubit<GoldSaleState> {
   final _uuid = const Uuid();
   
   /// جلب جميع المنتجات من الـ API
+  Future<List<GoldProduct>> fetchAvailableProducts({
+    Karat? karat,
+  }) async {
+    try {
+      final result = await _api.getAllProducts(
+        karat: karat,
+      );
+      
+      if (result['success'] == true) {
+        final data = result['data'] as Map<String, dynamic>;
+        final products = (data['products'] as List)
+            .map((json) => GoldProduct.fromJson(json))
+            .where((p) => p.status == ProductStatus.available)
+            .toList();
+        
+        return products;
+      } else {
+        return [];
+      }
+    } catch (e) {
+      return [];
+    }
+  }
+  
+  /// جلب جميع المنتجات من الـ API
   Future<void> loadProducts({
     Karat? karat,
   }) async {

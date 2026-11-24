@@ -1,4 +1,5 @@
 import 'package:codit/features/auth/presentation/auth_cubit.dart';
+import 'package:codit/features/auth/domain/models/auth_models.dart';
 import 'package:codit/features/auth/presentation/screens/login_screen.dart';
 import 'package:codit/features/auth/presentation/screens/otp_screen.dart';
 import 'package:codit/features/auth/presentation/screens/device_verification_screen.dart';
@@ -8,9 +9,15 @@ import 'package:codit/features/approvals/presentation/approvals_page.dart';
 import 'package:codit/features/approvals/presentation/approval_details_screen.dart';
 import 'package:codit/features/installments/presentation/installments_simple_page.dart';
 import 'package:codit/features/branches/presentation/branches_simple_page.dart';
+import 'package:codit/features/admin/presentation/admin_dashboard_page.dart';
+import 'package:codit/features/admin/presentation/staff_reports_page.dart';
+import 'package:codit/features/manager/presentation/manager_dashboard_page.dart';
+import 'package:codit/features/home/presentation/home_page.dart';
 import 'package:codit/core/widgets/font_test_widget.dart';
+import 'package:codit/core/theme/app_colors.dart';
 import 'package:codit/mocks/scenario_panel_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 /// Router - opens directly to login
@@ -103,18 +110,45 @@ GoRouter buildRouter(AuthCubit authCubit) {
       ),
 
       // Main Routes
-      GoRoute(path: '/home', builder: (_, __) => const _HomePage()),
+      GoRoute(path: '/home', builder: (_, __) => const HomePage()),
       GoRoute(
         path: '/notifications',
         builder: (_, __) => const NotificationsPage(),
       ),
 
       // Gold Sales
-      GoRoute(path: '/gold', builder: (_, __) => const GoldSalePage()),
+      GoRoute(
+        path: '/gold',
+        redirect: (context, state) {
+          final authState = authCubit.state;
+          if (authState is AuthAuthenticated) {
+            final permissions = authState.user.permissions;
+            if (permissions.contains('all') || 
+                permissions.contains('gold_sales') || 
+                permissions.contains('gold_pos')) {
+              return null; // Allow access
+            }
+          }
+          return '/home'; // Redirect to home if no permission
+        },
+        builder: (_, __) => const GoldSalePage(),
+      ),
 
       // Approvals
       GoRoute(
         path: '/approvals',
+        redirect: (context, state) {
+          final authState = authCubit.state;
+          if (authState is AuthAuthenticated) {
+            final permissions = authState.user.permissions;
+            if (permissions.contains('all') || 
+                permissions.contains('approvals') || 
+                permissions.contains('approval_management')) {
+              return null; // Allow access
+            }
+          }
+          return '/home'; // Redirect to home if no permission
+        },
         builder: (_, __) => const ApprovalsPage(),
       ),
       GoRoute(
@@ -144,13 +178,87 @@ GoRouter buildRouter(AuthCubit authCubit) {
       // Installments
       GoRoute(
         path: '/installments',
+        redirect: (context, state) {
+          final authState = authCubit.state;
+          if (authState is AuthAuthenticated) {
+            final permissions = authState.user.permissions;
+            if (permissions.contains('all') || 
+                permissions.contains('installments') || 
+                permissions.contains('payments') ||
+                permissions.contains('installments_pos')) {
+              return null; // Allow access
+            }
+          }
+          return '/home'; // Redirect to home if no permission
+        },
         builder: (_, __) => const InstallmentsSimplePage(),
       ),
 
       // Branch Monitoring
       GoRoute(
         path: '/branches',
+        redirect: (context, state) {
+          final authState = authCubit.state;
+          if (authState is AuthAuthenticated) {
+            final permissions = authState.user.permissions;
+            if (permissions.contains('all') || 
+                permissions.contains('branches') || 
+                permissions.contains('monitoring')) {
+              return null; // Allow access
+            }
+          }
+          return '/home'; // Redirect to home if no permission
+        },
         builder: (_, __) => const BranchesSimplePage(),
+      ),
+
+      // Admin Routes (للمالك فقط)
+      GoRoute(
+        path: '/admin',
+        redirect: (context, state) {
+          final authState = authCubit.state;
+          if (authState is AuthAuthenticated) {
+            final permissions = authState.user.permissions;
+            if (permissions.contains('all')) {
+              return null; // Allow access - owner only
+            }
+          }
+          return '/home'; // Redirect if not owner
+        },
+        builder: (_, __) => const AdminDashboardPage(),
+      ),
+      
+      // Staff Reports (للمالك فقط)
+      GoRoute(
+        path: '/admin/staff-reports',
+        redirect: (context, state) {
+          final authState = authCubit.state;
+          if (authState is AuthAuthenticated) {
+            final permissions = authState.user.permissions;
+            if (permissions.contains('all')) {
+              return null; // Allow access - owner only
+            }
+          }
+          return '/home'; // Redirect if not owner
+        },
+        builder: (_, __) => const StaffReportsPage(),
+      ),
+
+      // Manager Routes (للمدير فقط - يرى الموافقات وإدارة الفريق فقط)
+      GoRoute(
+        path: '/manager',
+        redirect: (context, state) {
+          final authState = authCubit.state;
+          if (authState is AuthAuthenticated) {
+            final permissions = authState.user.permissions;
+            if (permissions.contains('staff_management') || 
+                permissions.contains('approvals')) {
+              return null; // Allow access - manager only
+            }
+          }
+          return '/home'; // Redirect if not manager
+        },
+        builder: (_, __) => const ManagerDashboardPage(),
       ),
 
       // Dev Tools
@@ -168,61 +276,4 @@ class _AuthRefresh extends ChangeNotifier {
     _cubit.stream.listen((_) => notifyListeners());
   }
   final AuthCubit _cubit;
-}
-
-/// Simple home page placeholder
-class _HomePage extends StatelessWidget {
-  const _HomePage();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('CODIT Gold Shop'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications),
-            onPressed: () => context.go('/notifications'),
-            tooltip: 'الإشعارات',
-          ),
-        ],
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              'Welcome to CODIT Gold Shop',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 32),
-            ElevatedButton(
-              onPressed: () => context.go('/gold'),
-              child: const Text('Gold POS'),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => context.go('/approvals'),
-              child: const Text('Approvals'),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => context.go('/installments'),
-              child: const Text('Installments'),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => context.go('/branches'),
-              child: const Text('Branch Monitoring'),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => context.go('/notifications'),
-              child: const Text('Notifications'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }

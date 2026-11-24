@@ -219,7 +219,7 @@ class ResponsiveLayout extends StatelessWidget {
     super.key,
     required this.children,
     this.mainAxisAlignment = MainAxisAlignment.start,
-    this.crossAxisAlignment = CrossAxisAlignment.center,
+    this.crossAxisAlignment = CrossAxisAlignment.stretch,
     this.mainAxisSize = MainAxisSize.max,
   });
 

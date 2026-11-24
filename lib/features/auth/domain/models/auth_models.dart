@@ -7,7 +7,7 @@ part 'auth_models.g.dart';
 
 /// Authentication tokens with refresh capability
 @freezed
-class AuthTokens with _$AuthTokens {
+abstract class AuthTokens with _$AuthTokens {
   const factory AuthTokens({
     required String accessToken,
     required String refreshToken,
@@ -33,7 +33,7 @@ class AuthTokens with _$AuthTokens {
 
 /// User authentication state
 @freezed
-class AuthUser with _$AuthUser {
+abstract class AuthUser with _$AuthUser {
   const factory AuthUser({
     required String id,
     required String name,
@@ -51,7 +51,7 @@ class AuthUser with _$AuthUser {
 
 /// Login request
 @freezed
-class LoginRequest with _$LoginRequest {
+abstract class LoginRequest with _$LoginRequest {
   const factory LoginRequest({
     required String username,
     required String phone,
@@ -66,7 +66,7 @@ class LoginRequest with _$LoginRequest {
 
 /// Login response
 @freezed
-class LoginResponse with _$LoginResponse {
+abstract class LoginResponse with _$LoginResponse {
   const factory LoginResponse({
     required bool requiresOtp,
     required bool requiresDeviceVerification,
@@ -82,7 +82,7 @@ class LoginResponse with _$LoginResponse {
 
 /// OTP verification request
 @freezed
-class OtpVerificationRequest with _$OtpVerificationRequest {
+abstract class OtpVerificationRequest with _$OtpVerificationRequest {
   const factory OtpVerificationRequest({
     required String sessionId,
     required String otp,
@@ -95,7 +95,7 @@ class OtpVerificationRequest with _$OtpVerificationRequest {
 
 /// OTP verification response
 @freezed
-class OtpVerificationResponse with _$OtpVerificationResponse {
+abstract class OtpVerificationResponse with _$OtpVerificationResponse {
   const factory OtpVerificationResponse({
     required bool requiresDeviceVerification,
     AuthTokens? tokens,
@@ -109,7 +109,7 @@ class OtpVerificationResponse with _$OtpVerificationResponse {
 
 /// Device verification request
 @freezed
-class DeviceVerificationRequest with _$DeviceVerificationRequest {
+abstract class DeviceVerificationRequest with _$DeviceVerificationRequest {
   const factory DeviceVerificationRequest({
     required String deviceVerificationId,
     required String deviceId,
@@ -122,7 +122,7 @@ class DeviceVerificationRequest with _$DeviceVerificationRequest {
 
 /// Device verification response
 @freezed
-class DeviceVerificationResponse with _$DeviceVerificationResponse {
+abstract class DeviceVerificationResponse with _$DeviceVerificationResponse {
   const factory DeviceVerificationResponse({
     required bool verified,
     AuthTokens? tokens,
@@ -135,7 +135,7 @@ class DeviceVerificationResponse with _$DeviceVerificationResponse {
 
 /// Resend OTP request
 @freezed
-class ResendOtpRequest with _$ResendOtpRequest {
+abstract class ResendOtpRequest with _$ResendOtpRequest {
   const factory ResendOtpRequest({
     required String sessionId,
   }) = _ResendOtpRequest;
@@ -146,7 +146,7 @@ class ResendOtpRequest with _$ResendOtpRequest {
 
 /// Notification payload for deep linking
 @freezed
-class NotificationPayload with _$NotificationPayload {
+abstract class NotificationPayload with _$NotificationPayload {
   const factory NotificationPayload({
     required String type, // 'approval_request', 'sale', etc.
     required String id, // Resource ID

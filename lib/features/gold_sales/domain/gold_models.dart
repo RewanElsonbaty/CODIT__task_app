@@ -101,8 +101,10 @@ class GoldProduct extends Equatable {
   final Karat karat;
   final ProductStatus status;
   final String? imageUrl;
+  final String category;          // الفئة (خواتم، سلاسل، أساور...)
+  final double makingChargePerGram; // المصنعية الافتراضية للجرام (بالجنيه)
   
-  const GoldProduct({
+  GoldProduct({
     required this.code,
     required this.name,
     required this.barcode,
@@ -111,6 +113,8 @@ class GoldProduct extends Equatable {
     required this.karat,
     required this.status,
     this.imageUrl,
+    this.category = 'عام',
+    this.makingChargePerGram = 50.0,
   });
   
   int get netWeightMg => grossWeightMg - stonesWeightMg;
@@ -128,6 +132,8 @@ class GoldProduct extends Equatable {
         karat,
         status,
         imageUrl,
+        category,
+        makingChargePerGram,
       ];
   
   factory GoldProduct.fromJson(Map<String, dynamic> json) {
@@ -140,6 +146,8 @@ class GoldProduct extends Equatable {
       karat: Karat.values.byName(json['karat'] as String),
       status: ProductStatus.values.byName(json['status'] as String),
       imageUrl: json['image_url'] as String?,
+      category: json['category'] as String? ?? 'عام',
+      makingChargePerGram: (json['making_charge_per_gram'] as num?)?.toDouble() ?? 50.0,
     );
   }
   
@@ -153,6 +161,8 @@ class GoldProduct extends Equatable {
       'karat': karat.name,
       'status': status.name,
       'image_url': imageUrl,
+      'category': category,
+      'making_charge_per_gram': makingChargePerGram,
     };
   }
 }

@@ -7,7 +7,7 @@ part 'branch_selection.g.dart';
 
 /// Branch selection options
 @freezed
-class BranchSelection with _$BranchSelection {
+abstract class BranchSelection with _$BranchSelection {
   const factory BranchSelection.all() = AllBranches;
   
   const factory BranchSelection.specific({

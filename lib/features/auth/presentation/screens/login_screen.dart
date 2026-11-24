@@ -368,7 +368,34 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 32),
 
                     // Login button
-                    BlocBuilder<AuthCubit, AuthState>(
+                    BlocConsumer<AuthCubit, AuthState>(
+                      listener: (context, state) {
+                        // عرض رسالة خطأ إذا فشل تسجيل الدخول
+                        if (state is AuthError) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Row(
+                                children: [
+                                  const Icon(Icons.error, color: Colors.white),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      state.message,
+                                      style: const TextStyle(color: Colors.white),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              backgroundColor: const Color(0xFFEF4444),
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              duration: const Duration(seconds: 4),
+                            ),
+                          );
+                        }
+                      },
                       builder: (context, state) {
                         final isLoading = state is AuthLoading;
 
@@ -667,20 +694,21 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ],
         ),
-        content: Form(
-          key: formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'أدخل رقم الهاتف المسجل لإرسال رمز التحقق (OTP)',
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.7),
-                  fontSize: 14,
+        content: SingleChildScrollView(
+          child: Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'أدخل رقم الهاتف المسجل لإرسال رمز التحقق (OTP)',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.7),
+                    fontSize: 14,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 20),
+                const SizedBox(height: 16),
               TextFormField(
                 controller: phoneController,
                 keyboardType: TextInputType.phone,
@@ -722,6 +750,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ],
           ),
         ),
+      ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -819,33 +848,34 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ],
           ),
-          content: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'أدخل رمز التحقق المُرسل إلى $phone',
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.7),
-                    fontSize: 14,
+          content: SingleChildScrollView(
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'أدخل رمز التحقق المُرسل إلى $phone',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.7),
+                      fontSize: 14,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 20),
-                TextFormField(
-                  controller: otpController,
-                  keyboardType: TextInputType.number,
-                  maxLength: 6,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    letterSpacing: 8,
-                  ),
-                  textAlign: TextAlign.center,
-                  decoration: InputDecoration(
-                    labelText: 'رمز OTP',
-                    labelStyle: TextStyle(
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: otpController,
+                    keyboardType: TextInputType.number,
+                    maxLength: 6,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      letterSpacing: 8,
+                    ),
+                    textAlign: TextAlign.center,
+                    decoration: InputDecoration(
+                      labelText: 'رمز OTP',
+                      labelStyle: TextStyle(
                       color: Colors.white.withOpacity(0.6),
                     ),
                     filled: true,
@@ -871,7 +901,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
                 TextFormField(
                   controller: newPasswordController,
                   obscureText: true,
@@ -904,6 +934,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ],
             ),
           ),
+        ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),

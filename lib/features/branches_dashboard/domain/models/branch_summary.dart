@@ -7,7 +7,7 @@ part 'branch_summary.g.dart';
 
 /// Branch summary data with sequence tracking for real-time updates
 @freezed
-class BranchSummary with _$BranchSummary {
+abstract class BranchSummary with _$BranchSummary {
   const factory BranchSummary({
     required String branchId,
     required String branchName,
@@ -25,7 +25,7 @@ class BranchSummary with _$BranchSummary {
 
 /// Sales summary
 @freezed
-class SalesSummary with _$SalesSummary {
+abstract class SalesSummary with _$SalesSummary {
   const factory SalesSummary({
     required int totalSalesPiastres, // Total sales in piastres
     required int invoicesCount,
@@ -38,7 +38,7 @@ class SalesSummary with _$SalesSummary {
 
 /// Cash summary
 @freezed
-class CashSummary with _$CashSummary {
+abstract class CashSummary with _$CashSummary {
   const factory CashSummary({
     required int availableCashPiastres, // Available cash in piastres
     required int totalCollectionsPiastres, // Total collections in piastres
@@ -50,7 +50,7 @@ class CashSummary with _$CashSummary {
 
 /// Gold prices per karat
 @freezed
-class GoldPrices with _$GoldPrices {
+abstract class GoldPrices with _$GoldPrices {
   const factory GoldPrices({
     required int karat18PricePerGramPiastres, // Price per gram in piastres
     required int karat21PricePerGramPiastres,
@@ -104,7 +104,7 @@ extension OperationTypeExtension on OperationType {
 
 /// Recent operation
 @freezed
-class RecentOperation with _$RecentOperation {
+abstract class RecentOperation with _$RecentOperation {
   const factory RecentOperation({
     required String id,
     required OperationType type,
@@ -119,7 +119,7 @@ class RecentOperation with _$RecentOperation {
 
 /// Branch update (incremental update with sequence)
 @freezed
-class BranchUpdate with _$BranchUpdate {
+abstract class BranchUpdate with _$BranchUpdate {
   const factory BranchUpdate({
     required String branchId,
     required int sequence, // Sequence number for this update
