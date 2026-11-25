@@ -7,6 +7,9 @@ import 'package:codit/features/gold_sales/presentation/gold_sale_page.dart';
 import 'package:codit/features/notifications/presentation/pages/notifications_page.dart';
 import 'package:codit/features/approvals/presentation/approvals_page.dart';
 import 'package:codit/features/approvals/presentation/approval_details_screen.dart';
+import 'package:codit/features/approvals/presentation/installment_requests_page.dart';
+import 'package:codit/features/approvals/presentation/create_installment_request_page.dart';
+import 'package:codit/features/approvals/presentation/installment_request_details_page.dart';
 import 'package:codit/features/installments/presentation/installments_simple_page.dart';
 import 'package:codit/features/branches/presentation/branches_simple_page.dart';
 import 'package:codit/features/admin/presentation/admin_dashboard_page.dart';
@@ -259,6 +262,58 @@ GoRouter buildRouter(AuthCubit authCubit) {
           return '/home'; // Redirect if not manager
         },
         builder: (_, __) => const ManagerDashboardPage(),
+      ),
+
+      // Installment Requests (طلبات التقسيط)
+      GoRoute(
+        path: '/installment-requests',
+        redirect: (context, state) {
+          final authState = authCubit.state;
+          if (authState is AuthAuthenticated) {
+            final permissions = authState.user.permissions;
+            if (permissions.contains('all') || 
+                permissions.contains('installments') ||
+                permissions.contains('approvals')) {
+              return null;
+            }
+          }
+          return '/home';
+        },
+        builder: (_, state) {
+          final authState = authCubit.state;
+          String userRole = 'manager';
+          String? branchId;
+          
+          if (authState is AuthAuthenticated) {
+            if (authState.user.permissions.contains('all')) {
+              userRole = 'owner';
+            } else {
+              userRole = 'manager';
+              branchId = authState.user.branchId;
+            }
+          }
+          
+          return InstallmentRequestsPage(
+            userRole: userRole,
+            branchId: branchId,
+          );
+        },
+      ),
+      
+      GoRoute(
+        path: '/create-installment-request',
+        redirect: (context, state) {
+          final authState = authCubit.state;
+          if (authState is AuthAuthenticated) {
+            final permissions = authState.user.permissions;
+            if (permissions.contains('installments') ||
+                permissions.contains('approvals')) {
+              return null;
+            }
+          }
+          return '/home';
+        },
+        builder: (_, __) => const CreateInstallmentRequestPage(),
       ),
 
       // Dev Tools

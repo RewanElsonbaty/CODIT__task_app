@@ -4,6 +4,7 @@ import 'package:codit/core/theme/app_colors.dart';
 import 'package:codit/core/utils/responsive_utils.dart';
 import 'package:codit/features/gold_sales/domain/gold_models.dart';
 import 'package:codit/features/gold_sales/domain/product_categories.dart';
+import 'package:codit/features/gold_sales/presentation/pages/product_details_page.dart';
 
 /// Dialog متعدد المراحل لإضافة قطعة ذهب
 /// 
@@ -105,23 +106,21 @@ class _ProgressiveAddGoldDialogState extends State<ProgressiveAddGoldDialog> {
   void _applyFilters() {
     if (_selectedCategory == null) return;
 
-    final categoryId = _selectedCategory!.id;
-    final typeId = _selectedType?.id;
-
     setState(() {
       _filteredProducts = widget.availableProducts.where((product) {
-        // فلتر الفئة (category)
-        if (!product.category.toLowerCase().contains(categoryId.toLowerCase()) &&
-            !categoryId.toLowerCase().contains(product.category.toLowerCase())) {
+        // فلتر الحالة - فقط المنتجات المتاحة
+        if (!product.status.canSell) {
           return false;
         }
 
-        // فلتر النوع (type)
-        if (typeId != null) {
-          final productName = product.name.toLowerCase();
-          if (!productName.contains(typeId) && !productName.contains(_selectedType!.nameAr)) {
-            return false;
-          }
+        // فلتر الفئة (category) - تطابق ذكي
+        if (!_matchesCategory(product.category, _selectedCategory!)) {
+          return false;
+        }
+
+        // فلتر النوع (type) - ذهب/فضة/لازوردي
+        if (_selectedType != null && !_matchesType(product, _selectedType!)) {
+          return false;
         }
 
         // فلتر العيار
@@ -135,11 +134,6 @@ class _ProgressiveAddGoldDialogState extends State<ProgressiveAddGoldDialog> {
           return false;
         }
 
-        // فلتر الحالة - فقط المنتجات المتاحة
-        if (!product.status.canSell) {
-          return false;
-        }
-
         return true;
       }).toList();
 
@@ -147,16 +141,128 @@ class _ProgressiveAddGoldDialogState extends State<ProgressiveAddGoldDialog> {
     });
   }
 
-  void _selectProduct(GoldProduct product) {
-    setState(() {
-      _selectedProduct = product;
-    });
+  /// تحقق من تطابق الفئة
+  bool _matchesCategory(String productCategory, ProductCategory selectedCategory) {
+    final productCat = productCategory.toLowerCase().trim();
+    final selectedId = selectedCategory.id.toLowerCase();
+    final selectedNameAr = selectedCategory.nameAr.toLowerCase();
+    
+    // تطابق مباشر
+    if (productCat == selectedNameAr || productCat.contains(selectedNameAr)) {
+      return true;
+    }
+    
+    // تطابق ID (مثل: rings → خواتم)
+    final Map<String, List<String>> categoryMapping = {
+      'rings': ['خواتم', 'خاتم', 'دبل', 'دبلة'],
+      'necklaces': ['سلاسل', 'سلسلة', 'عقد'],
+      'bracelets': ['أساور', 'أسورة', 'سوار'],
+      'earrings': ['أقراط', 'قرط', 'حلق'],
+      'wedding_bands': ['دبل', 'دبلة'],
+      'sets': ['طقم', 'أطقم'],
+      'brooches': ['توك', 'توكة', 'دبوس'],
+      'anklets': ['غوايش', 'غويشة', 'خلخال'],
+    };
+    
+    if (categoryMapping.containsKey(selectedId)) {
+      return categoryMapping[selectedId]!.any((term) => productCat.contains(term));
+    }
+    
+    return false;
+  }
+
+  /// تحقق من تطابق النوع (ذهب/فضة/لازوردي)
+  bool _matchesType(GoldProduct product, ProductType selectedType) {
+    // حالياً نفترض أن كل المنتجات ذهب
+    // في المستقبل يمكن إضافة حقل type في GoldProduct
+    
+    // إذا كان النوع فضة أو لازوردي، نتحقق من الاسم
+    if (selectedType.id == 'silver') {
+      return product.name.toLowerCase().contains('فضة') ||
+             product.name.toLowerCase().contains('silver');
+    }
+    
+    if (selectedType.id == 'lazurde') {
+      return product.name.toLowerCase().contains('لازورد') ||
+             product.name.toLowerCase().contains('lazurde');
+    }
+    
+    // افتراضي: ذهب
+    return true;
+  }
+
+  void _selectProduct(GoldProduct product) async {
+    // Navigate to ProductDetailsPage
+    final result = await Navigator.of(context).push<Map<String, dynamic>>(
+      MaterialPageRoute(
+        builder: (context) => ProductDetailsPage(product: product),
+      ),
+    );
+
+    // If user added the product from details page, close the dialog and pass the data
+    if (result != null && mounted) {
+      final quantity = result['quantity'] as int? ?? 1;
+      widget.onAddItem(product, quantity);
+      
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+    }
   }
 
   void _confirmAddition() {
-    if (_selectedProduct != null && _quantity > 0) {
+    if (_selectedProduct == null || _quantity <= 0) {
+      return;
+    }
+
+    try {
       widget.onAddItem(_selectedProduct!, _quantity);
-      Navigator.of(context).pop();
+      
+      if (mounted) {
+        Navigator.of(context).pop();
+        
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.white),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'تم إضافة ${_selectedProduct!.name} (x$_quantity) بنجاح',
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: AppColors.successDark,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.error, color: Colors.white),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'خطأ في إضافة القطعة: $e',
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: AppColors.errorDark,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     }
   }
 

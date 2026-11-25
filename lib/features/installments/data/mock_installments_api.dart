@@ -97,6 +97,105 @@ class MockInstallmentsApi {
     return {'success': true, 'data': _customers};
   }
 
+  /// إنشاء عقد أقساط من طلب تقسيط موافق عليه
+  Future<Map<String, dynamic>> createContractFromInstallmentRequest({
+    required String requestId,
+    required String requestNumber,
+    required String customerId,
+    required String customerName,
+    required String customerPhone,
+    required String nationalId,
+    required String invoiceId,
+    required double totalAmount,
+    required double downPayment,
+    required double installmentAmount,
+    required int numberOfInstallments,
+    required DateTime firstPaymentDate,
+    required String paymentInterval, // 'monthly', 'weekly', 'daily'
+    required String branchId,
+    required String branchName,
+  }) async {
+    await _client.post(
+      '/installments/contracts/from-request',
+      body: {
+        'request_id': requestId,
+        'request_number': requestNumber,
+        'customer_id': customerId,
+        'customer_name': customerName,
+        'customer_phone': customerPhone,
+        'national_id': nationalId,
+        'invoice_id': invoiceId,
+        'total_amount': totalAmount,
+        'down_payment': downPayment,
+        'installment_amount': installmentAmount,
+        'number_of_installments': numberOfInstallments,
+        'first_payment_date': firstPaymentDate.toIso8601String(),
+        'payment_interval': paymentInterval,
+        'branch_id': branchId,
+        'branch_name': branchName,
+      },
+      canFail: true,
+    );
+
+    // إنشاء عميل إذا لم يكن موجودًا
+    final existingCustomer = _customers.where((c) => c['id'] == customerId).firstOrNull;
+    if (existingCustomer == null) {
+      _customers.add({
+        'id': customerId,
+        'name': customerName,
+        'phone': customerPhone,
+        'national_id': nationalId,
+        'address': 'عنوان غير محدد',
+        'credit_score': 750,
+        'total_debt': totalAmount - downPayment,
+        'overdue_debt': 0.0,
+        'contracts_count': 1,
+        'branch_id': branchId,
+        'branch_name': branchName,
+        'created_from_request': requestNumber,
+      });
+    } else {
+      // تحديث بيانات العميل
+      existingCustomer['total_debt'] = 
+          (existingCustomer['total_debt'] as double) + (totalAmount - downPayment);
+      existingCustomer['contracts_count'] = 
+          (existingCustomer['contracts_count'] as int) + 1;
+    }
+
+    final remainingAmount = totalAmount - downPayment;
+    
+    final contractId = 'cont_req_${requestNumber.split('-').last}';
+
+    final contract = {
+      'id': contractId,
+      'customer_id': customerId,
+      'customer_name': customerName,
+      'customer_phone': customerPhone,
+      'invoice_id': invoiceId,
+      'total_amount': totalAmount,
+      'down_payment': downPayment,
+      'remaining_amount': remainingAmount,
+      'monthly_installment': installmentAmount,
+      'installments_count': numberOfInstallments,
+      'paid_installments': 0,
+      'start_date': DateTime.now().toIso8601String(),
+      'first_payment_date': firstPaymentDate.toIso8601String(),
+      'payment_interval': paymentInterval,
+      'status': 'active',
+      'interest_rate': 0.0,
+      'late_fee_percentage': 5.0,
+      'created_at': DateTime.now().toIso8601String(),
+      'created_from_request': requestNumber,
+      'request_id': requestId,
+      'branch_id': branchId,
+      'branch_name': branchName,
+    };
+
+    _contracts.add(contract);
+
+    return {'success': true, 'data': contract};
+  }
+
   /// إنشاء عقد أقساط جديد
   Future<Map<String, dynamic>> createContract({
     required String customerId,

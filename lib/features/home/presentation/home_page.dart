@@ -232,6 +232,17 @@ class HomePage extends StatelessWidget {
       ));
     }
 
+    // Installment Requests (Managers and Owners)
+    if (hasPermission('approvals') || hasPermission('all')) {
+      menuItems.add(_MenuItem(
+        title: 'طلبات التقسيط',
+        subtitle: 'Installment Requests',
+        icon: Icons.request_page,
+        route: '/installment-requests',
+        color: AppColors.warning,
+      ));
+    }
+
     // Installments
     if (hasPermission('installments') || hasPermission('payments') || hasPermission('installments_pos')) {
       menuItems.add(_MenuItem(

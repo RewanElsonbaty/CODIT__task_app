@@ -69,8 +69,8 @@ class ProductCategories {
       id: 'rings',
       nameAr: 'خواتم',
       nameEn: 'Rings',
-      searchTermsAr: ['خاتم', 'خواتم', 'خ'],
-      searchTermsEn: ['ring', 'rings', 'r'],
+      searchTermsAr: ['خاتم', 'خواتم', 'خ', 'دبلة', 'دبل'],
+      searchTermsEn: ['ring', 'rings', 'r', 'wedding', 'band'],
       icon: '💍',
       types: [
         ProductType(id: 'gold', nameAr: 'ذهب', nameEn: 'Gold', icon: '🟡', hasKarat: true),
@@ -114,7 +114,7 @@ class ProductCategories {
       id: 'earrings',
       nameAr: 'أقراط',
       nameEn: 'Earrings',
-      searchTermsAr: ['قرط', 'أقراط', 'حلق', 'ق'],
+      searchTermsAr: ['قرط', 'أقراط', 'حلق', 'ق', 'ح'],
       searchTermsEn: ['earring', 'earrings', 'e'],
       icon: '👂',
       types: [

@@ -5,6 +5,7 @@ import 'package:codit/core/localization/app_localizations.dart';
 import 'package:codit/core/routing/app_router.dart';
 import 'package:codit/core/theme/luxury_theme.dart';
 import 'package:codit/features/auth/presentation/auth_cubit.dart';
+import 'package:codit/features/notifications/services/notification_scheduler_config.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
@@ -15,6 +16,11 @@ Future<void> main() async {
   
   try {
     await configureDependencies();
+    
+    // تفعيل جدولة الإشعارات التلقائية للأقساط
+    // يتم فحص الأقساط المستحقة والمتأخرة تلقائياً
+    NotificationSchedulerConfig.initialize();
+    
     runApp(const CoditApp());
   } catch (e) {
     print('Error initializing app: $e');

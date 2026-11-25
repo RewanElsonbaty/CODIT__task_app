@@ -180,9 +180,8 @@ class _InstallmentsPageContent extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('إضافة قسط جديد')),
-          );
+          // الانتقال لصفحة إنشاء طلب قسط جديد
+          context.go('/create-installment-request');
         },
         backgroundColor: AppColors.primary,
         icon: const Icon(Icons.add),
