@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 import '../../../core/data/mock_api_client.dart';
+import '../../../core/errors/exceptions.dart';
 
 /// Mock Authentication API
 /// يحاكي عمليات تسجيل الدخول والتوكنات والصلاحيات
@@ -9,83 +10,91 @@ class MockAuthApi {
   final Random _random = Random();
 
   // Mock Users Database - Static Authentication
-  // Each user has access to ONLY ONE feature
+  // الحسابات الأربعة الرئيسية
   final Map<String, MockUser> _users = {
-    // User 1: Gold Sales Only
-    'gold_user': MockUser(
-      id: 'user_gold_001',
-      username: 'gold_user',
-      password: 'gold123',
-      role: 'gold_sales_staff',
-      branchId: 'branch_main',
-      fullName: 'محمد أحمد - موظف مبيعات ذهب',
-      permissions: ['gold_sales', 'gold_pos'],
+    // ═══════════════════════════════════════════════════════════
+    // 1️⃣ المالك (Owner) - الصلاحيات الكاملة
+    // ═══════════════════════════════════════════════════════════
+    'owner': MockUser(
+      id: 'OWNER-001',
+      username: 'owner',
+      password: 'owner123',
+      role: 'owner',
+      branchId: null, // يمكنه الوصول لجميع الفروع
+      fullName: 'أحمد محمد - مالك النظام',
+      permissions: ['all'], // جميع الصلاحيات
     ),
     
-    // User 2: Branches Monitoring Only
-    'branches_user': MockUser(
-      id: 'user_branches_002',
-      username: 'branches_user',
-      password: 'branches123',
-      role: 'branch_monitor',
-      branchId: 'branch_main',
-      fullName: 'سارة علي - مراقب فروع',
-      permissions: ['branches', 'monitoring'],
+    // ═══════════════════════════════════════════════════════════
+    // 2️⃣ المدير (Manager) - إدارة الفرع + الموافقة والرفض
+    // ═══════════════════════════════════════════════════════════
+    'manager': MockUser(
+      id: 'MGR-001',
+      username: 'manager',
+      password: 'manager123',
+      role: 'manager',
+      branchId: 'branch_001',
+      fullName: 'محمد أحمد - مدير الفرع',
+      permissions: [
+        'installments',              // عرض الأقساط
+        'create_installment_request', // إنشاء طلبات تقسيط
+        'approvals',                 // عرض الموافقات
+        'approve_requests',          // الموافقة على الطلبات ← جديد
+        'reject_requests',           // رفض الطلبات ← جديد
+        'staff_management',          // إدارة موظفي فرعه
+        'branch_reports',            // تقارير فرعه
+        'branch_monitoring',         // مراقبة فرعه
+      ],
     ),
     
-    // User 3: Approvals Only
-    'approvals_user': MockUser(
-      id: 'user_approvals_003',
-      username: 'approvals_user',
-      password: 'approvals123',
-      role: 'approver',
-      branchId: 'branch_main',
-      fullName: 'خالد محمود - مسؤول موافقات',
-      permissions: ['approvals', 'approval_management'],
+    // ═══════════════════════════════════════════════════════════
+    // 3️⃣ الكاشير (Cashier) - المدفوعات فقط
+    // ═══════════════════════════════════════════════════════════
+    'cashier': MockUser(
+      id: 'CASH-001',
+      username: 'cashier',
+      password: 'cashier123',
+      role: 'cashier',
+      branchId: 'branch_001',
+      fullName: 'فاطمة حسن - كاشير',
+      permissions: [
+        'installments',         // عرض الأقساط
+        'payments',            // استلام المدفوعات
+        'installments_pos',    // نقطة البيع للأقساط
+        'print_receipts',      // طباعة الإيصالات
+      ],
     ),
     
-    // User 4: Installments Only
-    'installments_user': MockUser(
-      id: 'user_installments_004',
-      username: 'installments_user',
+    // ═══════════════════════════════════════════════════════════
+    // 4️⃣ مدير الأقساط (Installments Manager) - المراقبة والتقارير
+    // ═══════════════════════════════════════════════════════════
+    'installments_manager': MockUser(
+      id: 'INST-MGR-001',
+      username: 'installments_manager',
       password: 'installments123',
-      role: 'installments_officer',
-      branchId: 'branch_main',
-      fullName: 'نور حسن - مسؤول أقساط',
-      permissions: ['installments', 'payments'],
+      role: 'installments_manager',
+      branchId: null, // يمكنه رؤية جميع الفروع
+      fullName: 'خالد محمود - مدير الأقساط',
+      permissions: [
+        'installments',              // عرض الأقساط
+        'installments_monitoring',   // مراقبة جميع الأقساط
+        'installments_reports',      // تقارير الأقساط
+        'overdue_tracking',         // متابعة المتأخرات
+        'send_reminders',           // إرسال التذكيرات
+      ],
     ),
     
-    // Admin/Owner: Full Access (for testing)
+    // ═══════════════════════════════════════════════════════════
+    // Legacy/Backward Compatibility Users
+    // ═══════════════════════════════════════════════════════════
     'admin': MockUser(
       id: 'user_admin_005',
       username: 'admin',
       password: 'admin123',
       role: 'owner',
-      branchId: 'branch_main',
+      branchId: null,
       fullName: 'أحمد محمد - مالك النظام',
       permissions: ['all'],
-    ),
-    
-    // Manager: Approvals + Staff Management (his team only)
-    'manager': MockUser(
-      id: 'user_manager_006',
-      username: 'manager',
-      password: 'manager123',
-      role: 'manager',
-      branchId: 'branch_main',
-      fullName: 'خالد أحمد - مدير الفرع',
-      permissions: ['approvals', 'approval_management', 'staff_management', 'staff_reports', 'team_monitoring'],
-    ),
-    
-    // Cashier: Installments POS Only
-    'cashier': MockUser(
-      id: 'user_cashier_007',
-      username: 'cashier',
-      password: 'cashier123',
-      role: 'cashier',
-      branchId: 'branch_main',
-      fullName: 'فاطمة حسن - كاشير',
-      permissions: ['installments', 'payments', 'installments_pos'],
     ),
     
     // Legacy email-based users (backward compatibility)
@@ -127,51 +136,88 @@ class MockAuthApi {
     required String password,
     required String deviceId,
   }) async {
-    await _client.post(
-      '/auth/login',
-      body: {'username': username, 'password': password, 'device_id': deviceId},
-    );
+    try {
+      await _client.post(
+        '/auth/login',
+        body: {'username': username, 'password': password, 'device_id': deviceId},
+      );
 
-    // التحقق من بيانات الاعتماد
-    final user = _users[username];
-    if (user == null || user.password != password) {
-      throw MockNetworkException('اسم المستخدم أو كلمة المرور غير صحيحة');
+      // التحقق من فراغ البيانات
+      if (username.isEmpty || password.isEmpty) {
+        throw ValidationException('الرجاء إدخال اسم المستخدم وكلمة المرور');
+      }
+
+      // التحقق من بيانات الاعتماد
+      final user = _users[username];
+      if (user == null) {
+        throw NotFoundException('المستخدم غير موجود');
+      }
+
+      if (user.password != password) {
+        throw AuthException('كلمة المرور غير صحيحة');
+      }
+
+      // التحقق من حالة الحساب (يمكن إضافة isActive)
+      // if (!user.isActive) {
+      //   throw UnauthorizedException('الحساب غير نشط، الرجاء التواصل مع الإدارة');
+      // }
+
+      // إنشاء Session جديدة
+      final sessionId = _generateSessionId();
+      final accessToken = _generateToken();
+      final refreshToken = _generateToken(isRefresh: true);
+
+      _sessions[sessionId] = MockSession(
+        sessionId: sessionId,
+        userId: user.id,
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+        expiresAt: DateTime.now().add(const Duration(hours: 1)),
+        deviceId: deviceId,
+      );
+
+      return {
+        'success': true,
+        'data': {
+          'session_id': sessionId,
+          'access_token': accessToken,
+          'refresh_token': refreshToken,
+          'expires_in': 3600,
+          'token_type': 'Bearer',
+          'user': user.toJson(),
+        },
+      };
+    } on ValidationException {
+      rethrow;
+    } on NotFoundException {
+      rethrow;
+    } on AuthException {
+      rethrow;
+    } on UnauthorizedException {
+      rethrow;
+    } catch (e) {
+      throw MockNetworkException('فشل الاتصال بخدمة المصادقة: ${e.toString()}');
     }
-
-    // إنشاء Session جديدة
-    final sessionId = _generateSessionId();
-    final accessToken = _generateToken();
-    final refreshToken = _generateToken(isRefresh: true);
-
-    _sessions[sessionId] = MockSession(
-      sessionId: sessionId,
-      userId: user.id,
-      accessToken: accessToken,
-      refreshToken: refreshToken,
-      expiresAt: DateTime.now().add(const Duration(hours: 1)),
-      deviceId: deviceId,
-    );
-
-    return {
-      'success': true,
-      'data': {
-        'session_id': sessionId,
-        'access_token': accessToken,
-        'refresh_token': refreshToken,
-        'expires_in': 3600,
-        'token_type': 'Bearer',
-        'user': user.toJson(),
-      },
-    };
   }
 
   /// تسجيل الخروج
   Future<Map<String, dynamic>> logout(String sessionId) async {
-    await _client.post('/auth/logout');
+    try {
+      await _client.post('/auth/logout');
 
-    _sessions.remove(sessionId);
+      // التحقق من وجود Session
+      if (!_sessions.containsKey(sessionId)) {
+        throw NotFoundException('الجلسة غير موجودة');
+      }
 
-    return {'success': true, 'message': 'تم تسجيل الخروج بنجاح'};
+      _sessions.remove(sessionId);
+
+      return {'success': true, 'message': 'تم تسجيل الخروج بنجاح'};
+    } on NotFoundException {
+      rethrow;
+    } catch (e) {
+      throw MockNetworkException('فشل في تسجيل الخروج: ${e.toString()}');
+    }
   }
 
   /// تحديث التوكن (Refresh Token)
@@ -179,69 +225,121 @@ class MockAuthApi {
     required String refreshToken,
     required String sessionId,
   }) async {
-    await _client.post('/auth/refresh', body: {'refresh_token': refreshToken});
+    try {
+      await _client.post('/auth/refresh', body: {'refresh_token': refreshToken});
 
-    final session = _sessions[sessionId];
-    if (session == null || session.refreshToken != refreshToken) {
-      throw MockNetworkException('التوكن غير صالح');
+      final session = _sessions[sessionId];
+      if (session == null) {
+        throw NotFoundException('الجلسة غير موجودة');
+      }
+
+      if (session.refreshToken != refreshToken) {
+        throw AuthException('التوكن غير صالح');
+      }
+
+      // التحقق من انتهاء الصلاحية
+      if (session.expiresAt.isBefore(DateTime.now())) {
+        throw TimeoutException('انتهت صلاحية الجلسة');
+      }
+
+      // إنشاء توكن جديد
+      final newAccessToken = _generateToken();
+      final newRefreshToken = _generateToken(isRefresh: true);
+
+      _sessions[sessionId] = session.copyWith(
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
+        expiresAt: DateTime.now().add(const Duration(hours: 1)),
+      );
+
+      return {
+        'success': true,
+        'data': {
+          'access_token': newAccessToken,
+          'refresh_token': newRefreshToken,
+          'expires_in': 3600,
+        },
+      };
+    } on NotFoundException {
+      rethrow;
+    } on AuthException {
+      rethrow;
+    } on TimeoutException {
+      rethrow;
+    } catch (e) {
+      throw MockNetworkException('فشل في تحديث التوكن: ${e.toString()}');
     }
-
-    // إنشاء توكن جديد
-    final newAccessToken = _generateToken();
-    final newRefreshToken = _generateToken(isRefresh: true);
-
-    _sessions[sessionId] = session.copyWith(
-      accessToken: newAccessToken,
-      refreshToken: newRefreshToken,
-      expiresAt: DateTime.now().add(const Duration(hours: 1)),
-    );
-
-    return {
-      'success': true,
-      'data': {
-        'access_token': newAccessToken,
-        'refresh_token': newRefreshToken,
-        'expires_in': 3600,
-      },
-    };
   }
 
   /// التحقق من التوكن
   Future<Map<String, dynamic>> verifyToken(String token) async {
-    await _client.post('/auth/verify', body: {'token': token});
+    try {
+      await _client.post('/auth/verify', body: {'token': token});
 
-    // البحث عن session بهذا التوكن
-    final session = _sessions.values.firstWhere(
-      (s) => s.accessToken == token,
-      orElse: () => throw MockNetworkException('التوكن غير صالح'),
-    );
+      if (token.isEmpty) {
+        throw ValidationException('التوكن مطلوب');
+      }
 
-    // التحقق من انتهاء الصلاحية
-    if (session.expiresAt.isBefore(DateTime.now())) {
-      throw MockNetworkException('انتهت صلاحية التوكن');
+      // البحث عن session بهذا التوكن
+      MockSession? session;
+      try {
+        session = _sessions.values.firstWhere((s) => s.accessToken == token);
+      } catch (e) {
+        throw AuthException('التوكن غير صالح');
+      }
+
+      // التحقق من انتهاء الصلاحية
+      if (session.expiresAt.isBefore(DateTime.now())) {
+        throw TimeoutException('انتهت صلاحية التوكن');
+      }
+
+      final user = _users.values.firstWhere(
+        (u) => u.id == session!.userId,
+        orElse: () => throw NotFoundException('المستخدم غير موجود'),
+      );
+
+      return {
+        'success': true,
+        'data': {'valid': true, 'user': user.toJson()},
+      };
+    } on ValidationException {
+      rethrow;
+    } on AuthException {
+      rethrow;
+    } on TimeoutException {
+      rethrow;
+    } on NotFoundException {
+      rethrow;
+    } catch (e) {
+      throw MockNetworkException('فشل في التحقق من التوكن: ${e.toString()}');
     }
-
-    final user = _users.values.firstWhere((u) => u.id == session.userId);
-
-    return {
-      'success': true,
-      'data': {'valid': true, 'user': user.toJson()},
-    };
   }
 
   /// الحصول على الصلاحيات
   Future<Map<String, dynamic>> getPermissions(String userId) async {
-    await _client.get('/auth/permissions/$userId');
+    try {
+      await _client.get('/auth/permissions/$userId');
 
-    final user = _users.values.firstWhere(
-      (u) => u.id == userId,
-      orElse: () => throw MockNetworkException('المستخدم غير موجود'),
-    );
+      if (userId.isEmpty) {
+        throw ValidationException('معرف المستخدم مطلوب');
+      }
 
-    return {
-      'success': true,
-      'data': {'permissions': user.permissions, 'role': user.role},
-    };
+      final user = _users.values.firstWhere(
+        (u) => u.id == userId,
+        orElse: () => throw NotFoundException('المستخدم غير موجود'),
+      );
+
+      return {
+        'success': true,
+        'data': {'permissions': user.permissions, 'role': user.role},
+      };
+    } on ValidationException {
+      rethrow;
+    } on NotFoundException {
+      rethrow;
+    } catch (e) {
+      throw MockNetworkException('فشل في تحميل الصلاحيات: ${e.toString()}');
+    }
   }
 
   /// تغيير كلمة المرور
@@ -250,28 +348,51 @@ class MockAuthApi {
     required String oldPassword,
     required String newPassword,
   }) async {
-    await _client.post(
-      '/auth/change-password',
-      body: {
-        'user_id': userId,
-        'old_password': oldPassword,
-        'new_password': newPassword,
-      },
-    );
+    try {
+      await _client.post(
+        '/auth/change-password',
+        body: {
+          'user_id': userId,
+          'old_password': oldPassword,
+          'new_password': newPassword,
+        },
+      );
 
-    final user = _users.values.firstWhere(
-      (u) => u.id == userId,
-      orElse: () => throw MockNetworkException('المستخدم غير موجود'),
-    );
+      // التحقق من البيانات
+      if (userId.isEmpty || oldPassword.isEmpty || newPassword.isEmpty) {
+        throw ValidationException('جميع الحقول مطلوبة');
+      }
 
-    if (user.password != oldPassword) {
-      throw MockNetworkException('كلمة المرور القديمة غير صحيحة');
+      if (newPassword.length < 6) {
+        throw ValidationException('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
+      }
+
+      if (oldPassword == newPassword) {
+        throw ValidationException('كلمة المرور الجديدة يجب أن تكون مختلفة عن القديمة');
+      }
+
+      final user = _users.values.firstWhere(
+        (u) => u.id == userId,
+        orElse: () => throw NotFoundException('المستخدم غير موجود'),
+      );
+
+      if (user.password != oldPassword) {
+        throw AuthException('كلمة المرور القديمة غير صحيحة');
+      }
+
+      // تحديث كلمة المرور (في الحقيقة يجب أن تكون hash)
+      _users[user.username] = user.copyWith(password: newPassword);
+
+      return {'success': true, 'message': 'تم تغيير كلمة المرور بنجاح'};
+    } on ValidationException {
+      rethrow;
+    } on NotFoundException {
+      rethrow;
+    } on AuthException {
+      rethrow;
+    } catch (e) {
+      throw MockNetworkException('فشل في تغيير كلمة المرور: ${e.toString()}');
     }
-
-    // تحديث كلمة المرور (في الحقيقة يجب أن تكون hash)
-    _users[user.username] = user.copyWith(password: newPassword);
-
-    return {'success': true, 'message': 'تم تغيير كلمة المرور بنجاح'};
   }
 
   /// محاكاة Token Expiry لأغراض الاختبار
@@ -302,7 +423,7 @@ class MockUser {
   final String username;
   final String password;
   final String role;
-  final String branchId;
+  final String? branchId; // ← nullable لأن المالك ومدير الأقساط لا ينتميان لفرع محدد
   final String fullName;
   final List<String> permissions;
 
@@ -311,7 +432,7 @@ class MockUser {
     required this.username,
     required this.password,
     required this.role,
-    required this.branchId,
+    this.branchId, // ← optional
     required this.fullName,
     required this.permissions,
   });

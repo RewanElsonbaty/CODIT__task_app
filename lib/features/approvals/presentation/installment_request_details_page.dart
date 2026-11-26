@@ -1,14 +1,14 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:codit/core/theme/app_colors.dart';
 import 'package:codit/core/utils/responsive_utils.dart';
 import 'package:codit/core/utils/exception_handler.dart';
 import '../domain/installment_request_models.dart';
 import '../data/mock_installment_requests_api.dart';
 
-/// ØµÙØ­Ø© ØªÙØ§ØµÙŠÙ„ Ø·Ù„Ø¨ Ø§Ù„ØªÙ‚Ø³ÙŠØ·
+/// صفحة تفاصيل طلب التقسيط
 /// 
-/// Ù„Ù„Ù…Ø§Ù„Ùƒ: Ø¹Ø±Ø¶ Ø§Ù„ØªÙØ§ØµÙŠÙ„ + Ø§Ù„Ù…ÙˆØ§ÙÙ‚Ø©/Ø§Ù„Ø±ÙØ¶
-/// Ù„Ù„Ù…Ø¯ÙŠØ±: Ø¹Ø±Ø¶ Ø§Ù„ØªÙØ§ØµÙŠÙ„ ÙÙ‚Ø·
+/// للمالك: عرض التفاصيل + الموافقة/الرفض
+/// للمدير: عرض التفاصيل فقط
 class InstallmentRequestDetailsPage extends StatefulWidget {
   final InstallmentRequest request;
   final String userRole; // 'owner' or 'manager'
@@ -44,32 +44,38 @@ class _InstallmentRequestDetailsPageState
     super.dispose();
   }
 
+  /// ?????? ?? ?????? ???????? ?? ?????
+  /// ?????? ??????? ??????? ???????? ??????
+  bool _canApproveOrReject() {
+    return widget.userRole == 'owner' || widget.userRole == 'manager';
+  }
+
   Future<void> _approveRequest() async {
-    // ØªØ£ÙƒÙŠØ¯ Ø§Ù„Ù…ÙˆØ§ÙÙ‚Ø©
+    // تأكيد الموافقة
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.surface,
         title: const Text(
-          'ØªØ£ÙƒÙŠØ¯ Ø§Ù„Ù…ÙˆØ§ÙÙ‚Ø©',
+          'تأكيد الموافقة',
           style: TextStyle(color: AppColors.textPrimary),
         ),
         content: Text(
-          'Ù‡Ù„ Ø£Ù†Øª Ù…ØªØ£ÙƒØ¯ Ù…Ù† Ø§Ù„Ù…ÙˆØ§ÙÙ‚Ø© Ø¹Ù„Ù‰ Ø·Ù„Ø¨ Ø§Ù„ØªÙ‚Ø³ÙŠØ·ØŸ\n\n'
-          'Ø³ÙŠØªÙ… Ø¥Ø¶Ø§ÙØ© Ø§Ù„Ù‚Ø³Ø· Ù„Ø­Ø³Ø§Ø¨ ${_currentRequest.customerName}',
+          'هل أنت متأكد من الموافقة على طلب التقسيط؟\n\n'
+          'سيتم إضافة القسط لحساب ${_currentRequest.customerName}',
           style: const TextStyle(color: AppColors.textSecondary),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Ø¥Ù„ØºØ§Ø¡'),
+            child: const Text('إلغاء'),
           ),
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.success,
             ),
-            child: const Text('Ù…ÙˆØ§ÙÙ‚Ø©'),
+            child: const Text('موافقة'),
           ),
         ],
       ),
@@ -86,7 +92,7 @@ class _InstallmentRequestDetailsPageState
         requestId: _currentRequest.id,
         approved: true,
         reviewedBy: 'OWNER-001', // TODO: Get from current user
-        reviewedByName: 'Ø£Ø­Ù…Ø¯ Ø§Ù„Ù…Ø§Ù„Ùƒ', // TODO: Get from current user
+        reviewedByName: 'أحمد المالك', // TODO: Get from current user
         reviewedAt: DateTime.now(),
       );
 
@@ -105,7 +111,7 @@ class _InstallmentRequestDetailsPageState
                 Icon(Icons.check_circle, color: Colors.white),
                 SizedBox(width: 12),
                 Expanded(
-                  child: Text('ØªÙ…Øª Ø§Ù„Ù…ÙˆØ§ÙÙ‚Ø© Ø¹Ù„Ù‰ Ø§Ù„Ø·Ù„Ø¨ Ø¨Ù†Ø¬Ø§Ø­'),
+                  child: Text('تمت الموافقة على الطلب بنجاح'),
                 ),
               ],
             ),
@@ -114,7 +120,7 @@ class _InstallmentRequestDetailsPageState
           ),
         );
 
-        // Ø§Ù„Ø¹ÙˆØ¯Ø© Ù…Ø¹ ØªØ­Ø¯ÙŠØ«
+        // العودة مع تحديث
         Navigator.of(context).pop(true);
       }
     } catch (e) {
@@ -126,7 +132,7 @@ class _InstallmentRequestDetailsPageState
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Ø®Ø·Ø£ ÙÙŠ Ø§Ù„Ù…ÙˆØ§ÙÙ‚Ø©: ${e.toString()}'),
+            content: Text('خطأ في الموافقة: ${e.toString()}'),
             backgroundColor: AppColors.errorDark,
             behavior: SnackBarBehavior.floating,
           ),
@@ -136,20 +142,20 @@ class _InstallmentRequestDetailsPageState
   }
 
   Future<void> _rejectRequest() async {
-    // ÙØªØ­ dialog Ù„Ø¥Ø¯Ø®Ø§Ù„ Ø³Ø¨Ø¨ Ø§Ù„Ø±ÙØ¶
+    // فتح dialog لإدخال سبب الرفض
     final reason = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.surface,
         title: const Text(
-          'Ø±ÙØ¶ Ø§Ù„Ø·Ù„Ø¨',
+          'رفض الطلب',
           style: TextStyle(color: AppColors.textPrimary),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             const Text(
-              'ÙŠØ±Ø¬Ù‰ ØªØ­Ø¯ÙŠØ¯ Ø³Ø¨Ø¨ Ø±ÙØ¶ Ø§Ù„Ø·Ù„Ø¨:',
+              'يرجى تحديد سبب رفض الطلب:',
               style: TextStyle(color: AppColors.textSecondary),
             ),
             const SizedBox(height: 16),
@@ -158,7 +164,7 @@ class _InstallmentRequestDetailsPageState
               maxLines: 3,
               style: const TextStyle(color: AppColors.textPrimary),
               decoration: InputDecoration(
-                hintText: 'Ø§ÙƒØªØ¨ Ø³Ø¨Ø¨ Ø§Ù„Ø±ÙØ¶ Ù‡Ù†Ø§...',
+                hintText: 'اكتب سبب الرفض هنا...',
                 hintStyle: TextStyle(color: AppColors.textSecondary.withOpacity(0.5)),
                 filled: true,
                 fillColor: AppColors.card,
@@ -176,7 +182,7 @@ class _InstallmentRequestDetailsPageState
               _rejectionReasonController.clear();
               Navigator.of(context).pop();
             },
-            child: const Text('Ø¥Ù„ØºØ§Ø¡'),
+            child: const Text('إلغاء'),
           ),
           ElevatedButton(
             onPressed: () {
@@ -184,7 +190,7 @@ class _InstallmentRequestDetailsPageState
               if (reason.isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('ÙŠØ±Ø¬Ù‰ Ø¥Ø¯Ø®Ø§Ù„ Ø³Ø¨Ø¨ Ø§Ù„Ø±ÙØ¶'),
+                    content: Text('يرجى إدخال سبب الرفض'),
                     backgroundColor: AppColors.errorDark,
                   ),
                 );
@@ -195,7 +201,7 @@ class _InstallmentRequestDetailsPageState
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.errorDark,
             ),
-            child: const Text('Ø±ÙØ¶ Ø§Ù„Ø·Ù„Ø¨'),
+            child: const Text('رفض الطلب'),
           ),
         ],
       ),
@@ -213,7 +219,7 @@ class _InstallmentRequestDetailsPageState
         approved: false,
         rejectionReason: reason,
         reviewedBy: 'OWNER-001', // TODO: Get from current user
-        reviewedByName: 'Ø£Ø­Ù…Ø¯ Ø§Ù„Ù…Ø§Ù„Ùƒ', // TODO: Get from current user
+        reviewedByName: 'أحمد المالك', // TODO: Get from current user
         reviewedAt: DateTime.now(),
       );
 
@@ -232,7 +238,7 @@ class _InstallmentRequestDetailsPageState
                 Icon(Icons.block, color: Colors.white),
                 SizedBox(width: 12),
                 Expanded(
-                  child: Text('ØªÙ… Ø±ÙØ¶ Ø§Ù„Ø·Ù„Ø¨'),
+                  child: Text('تم رفض الطلب'),
                 ),
               ],
             ),
@@ -241,7 +247,7 @@ class _InstallmentRequestDetailsPageState
           ),
         );
 
-        // Ø§Ù„Ø¹ÙˆØ¯Ø© Ù…Ø¹ ØªØ­Ø¯ÙŠØ«
+        // العودة مع تحديث
         Navigator.of(context).pop(true);
       }
     } catch (e) {
@@ -253,7 +259,7 @@ class _InstallmentRequestDetailsPageState
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Ø®Ø·Ø£ ÙÙŠ Ø§Ù„Ø±ÙØ¶: ${e.toString()}'),
+            content: Text('خطأ في الرفض: ${e.toString()}'),
             backgroundColor: AppColors.errorDark,
             behavior: SnackBarBehavior.floating,
           ),
@@ -294,29 +300,29 @@ class _InstallmentRequestDetailsPageState
       body: ListView(
         padding: EdgeInsets.all(ResponsiveUtils.horizontalPadding(context)),
         children: [
-          // Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ø¹Ù…ÙŠÙ„
+          // بيانات العميل
           _buildSection(
-            title: 'Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ø¹Ù…ÙŠÙ„',
+            title: 'بيانات العميل',
             icon: Icons.person,
             children: [
               _buildDetailRow(
                 icon: Icons.person_outline,
-                label: 'Ø§Ø³Ù… Ø§Ù„Ø¹Ù…ÙŠÙ„',
+                label: 'اسم العميل',
                 value: _currentRequest.customerName,
               ),
               _buildDetailRow(
                 icon: Icons.badge,
-                label: 'Ø±Ù‚Ù… Ø§Ù„Ø¹Ù…ÙŠÙ„',
+                label: 'رقم العميل',
                 value: _currentRequest.customerId,
               ),
               _buildDetailRow(
                 icon: Icons.phone,
-                label: 'Ø±Ù‚Ù… Ø§Ù„Ù‡Ø§ØªÙ',
+                label: 'رقم الهاتف',
                 value: _currentRequest.customerPhone,
               ),
               _buildDetailRow(
                 icon: Icons.credit_card,
-                label: 'Ø§Ù„Ø±Ù‚Ù… Ø§Ù„Ù‚ÙˆÙ…ÙŠ',
+                label: 'الرقم القومي',
                 value: _currentRequest.nationalId,
               ),
             ],
@@ -324,32 +330,32 @@ class _InstallmentRequestDetailsPageState
 
           const SizedBox(height: 20),
 
-          // Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„ÙØ§ØªÙˆØ±Ø©
+          // بيانات الفاتورة
           _buildSection(
-            title: 'Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„ÙØ§ØªÙˆØ±Ø©',
+            title: 'بيانات الفاتورة',
             icon: Icons.receipt_long,
             children: [
               _buildDetailRow(
                 icon: Icons.receipt,
-                label: 'Ø±Ù‚Ù… Ø§Ù„ÙØ§ØªÙˆØ±Ø©',
+                label: 'رقم الفاتورة',
                 value: _currentRequest.invoiceId,
               ),
               _buildDetailRow(
                 icon: Icons.attach_money,
-                label: 'Ø§Ù„Ù…Ø¨Ù„Øº Ø§Ù„Ø¥Ø¬Ù…Ø§Ù„ÙŠ',
-                value: '${_currentRequest.totalAmount.toStringAsFixed(2)} Ø¬Ù†ÙŠÙ‡',
+                label: 'المبلغ الإجمالي',
+                value: '${_currentRequest.totalAmount.toStringAsFixed(2)} جنيه',
                 valueColor: AppColors.goldenNeon,
                 isHighlighted: true,
               ),
               _buildDetailRow(
                 icon: Icons.payments,
-                label: 'Ø§Ù„Ø¯ÙØ¹Ø© Ø§Ù„Ø£ÙˆÙ„Ù‰',
-                value: '${_currentRequest.downPayment.toStringAsFixed(2)} Ø¬Ù†ÙŠÙ‡',
+                label: 'الدفعة الأولى',
+                value: '${_currentRequest.downPayment.toStringAsFixed(2)} جنيه',
               ),
               _buildDetailRow(
                 icon: Icons.calculate,
-                label: 'Ø§Ù„Ù…Ø¨Ù„Øº Ø§Ù„Ù…ØªØ¨Ù‚ÙŠ',
-                value: '${_currentRequest.remainingAmount.toStringAsFixed(2)} Ø¬Ù†ÙŠÙ‡',
+                label: 'المبلغ المتبقي',
+                value: '${_currentRequest.remainingAmount.toStringAsFixed(2)} جنيه',
                 valueColor: AppColors.textPrimary,
                 isHighlighted: true,
               ),
@@ -358,32 +364,32 @@ class _InstallmentRequestDetailsPageState
 
           const SizedBox(height: 20),
 
-          // ØªÙØ§ØµÙŠÙ„ Ø§Ù„ØªÙ‚Ø³ÙŠØ·
+          // تفاصيل التقسيط
           _buildSection(
-            title: 'ØªÙØ§ØµÙŠÙ„ Ø§Ù„ØªÙ‚Ø³ÙŠØ·',
+            title: 'تفاصيل التقسيط',
             icon: Icons.payment,
             children: [
               _buildDetailRow(
                 icon: Icons.money,
-                label: 'Ù‚ÙŠÙ…Ø© Ø§Ù„Ù‚Ø³Ø·',
-                value: '${_currentRequest.installmentAmount.toStringAsFixed(2)} Ø¬Ù†ÙŠÙ‡',
+                label: 'قيمة القسط',
+                value: '${_currentRequest.installmentAmount.toStringAsFixed(2)} جنيه',
                 valueColor: AppColors.goldenNeon,
                 isHighlighted: true,
               ),
               _buildDetailRow(
                 icon: Icons.numbers,
-                label: 'Ø¹Ø¯Ø¯ Ø§Ù„Ø£Ù‚Ø³Ø§Ø·',
-                value: '${_currentRequest.numberOfInstallments} Ù‚Ø³Ø·',
+                label: 'عدد الأقساط',
+                value: '${_currentRequest.numberOfInstallments} قسط',
               ),
               _buildDetailRow(
                 icon: Icons.calendar_today,
-                label: 'Ù…ÙˆØ¹Ø¯ Ø£ÙˆÙ„ Ø¯ÙØ¹Ø©',
+                label: 'موعد أول دفعة',
                 value:
                     '${_currentRequest.firstPaymentDate.day}/${_currentRequest.firstPaymentDate.month}/${_currentRequest.firstPaymentDate.year}',
               ),
               _buildDetailRow(
                 icon: Icons.schedule,
-                label: 'ÙØªØ±Ø© Ø§Ù„Ø³Ø¯Ø§Ø¯',
+                label: 'فترة السداد',
                 value: _currentRequest.paymentIntervalArabic,
               ),
             ],
@@ -391,24 +397,24 @@ class _InstallmentRequestDetailsPageState
 
           const SizedBox(height: 20),
 
-          // Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ø·Ù„Ø¨
+          // بيانات الطلب
           _buildSection(
-            title: 'Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ø·Ù„Ø¨',
+            title: 'بيانات الطلب',
             icon: Icons.info,
             children: [
               _buildDetailRow(
                 icon: Icons.store,
-                label: 'Ø§Ù„ÙØ±Ø¹',
+                label: 'الفرع',
                 value: _currentRequest.branchName,
               ),
               _buildDetailRow(
                 icon: Icons.person_outline,
-                label: 'Ù…Ù‚Ø¯Ù… Ø§Ù„Ø·Ù„Ø¨',
+                label: 'مقدم الطلب',
                 value: _currentRequest.requestedByName,
               ),
               _buildDetailRow(
                 icon: Icons.access_time,
-                label: 'ØªØ§Ø±ÙŠØ® Ø§Ù„ØªÙ‚Ø¯ÙŠÙ…',
+                label: 'تاريخ التقديم',
                 value:
                     '${_currentRequest.createdAt.day}/${_currentRequest.createdAt.month}/${_currentRequest.createdAt.year} - ${_currentRequest.createdAt.hour}:${_currentRequest.createdAt.minute.toString().padLeft(2, '0')}',
               ),
@@ -416,29 +422,29 @@ class _InstallmentRequestDetailsPageState
                   _currentRequest.notes!.isNotEmpty)
                 _buildDetailRow(
                   icon: Icons.note,
-                  label: 'Ù…Ù„Ø§Ø­Ø¸Ø§Øª',
+                  label: 'ملاحظات',
                   value: _currentRequest.notes!,
                   isMultiline: true,
                 ),
             ],
           ),
 
-          // Ø¥Ø°Ø§ ØªÙ…Øª Ø§Ù„Ù…Ø±Ø§Ø¬Ø¹Ø©
+          // إذا تمت المراجعة
           if (!_currentRequest.isPending) ...[
             const SizedBox(height: 20),
             _buildSection(
-              title: 'Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ù…Ø±Ø§Ø¬Ø¹Ø©',
+              title: 'بيانات المراجعة',
               icon: Icons.check_circle,
               children: [
                 _buildDetailRow(
                   icon: Icons.person,
-                  label: 'Ø§Ù„Ù…Ø±Ø§Ø¬Ø¹',
-                  value: _currentRequest.reviewedByName ?? 'ØºÙŠØ± Ù…Ø­Ø¯Ø¯',
+                  label: 'المراجع',
+                  value: _currentRequest.reviewedByName ?? 'غير محدد',
                 ),
                 if (_currentRequest.reviewedAt != null)
                   _buildDetailRow(
                     icon: Icons.access_time,
-                    label: 'ØªØ§Ø±ÙŠØ® Ø§Ù„Ù…Ø±Ø§Ø¬Ø¹Ø©',
+                    label: 'تاريخ المراجعة',
                     value:
                         '${_currentRequest.reviewedAt!.day}/${_currentRequest.reviewedAt!.month}/${_currentRequest.reviewedAt!.year} - ${_currentRequest.reviewedAt!.hour}:${_currentRequest.reviewedAt!.minute.toString().padLeft(2, '0')}',
                   ),
@@ -446,7 +452,7 @@ class _InstallmentRequestDetailsPageState
                     _currentRequest.rejectionReason != null)
                   _buildDetailRow(
                     icon: Icons.block,
-                    label: 'Ø³Ø¨Ø¨ Ø§Ù„Ø±ÙØ¶',
+                    label: 'سبب الرفض',
                     value: _currentRequest.rejectionReason!,
                     valueColor: AppColors.errorDark,
                     isMultiline: true,
@@ -455,8 +461,8 @@ class _InstallmentRequestDetailsPageState
             ),
           ],
 
-          // Ø£Ø²Ø±Ø§Ø± Ø§Ù„Ù…ÙˆØ§ÙÙ‚Ø©/Ø§Ù„Ø±ÙØ¶ (Ù„Ù„Ù…Ø§Ù„Ùƒ ÙÙ‚Ø·)
-          if (widget.userRole == 'owner' && _currentRequest.isPending) ...[
+          // أزرار الموافقة/الرفض (للمالك فقط)
+          if (_canApproveOrReject() && _currentRequest.isPending) ...[
             const SizedBox(height: 32),
             Row(
               children: [
@@ -473,7 +479,7 @@ class _InstallmentRequestDetailsPageState
                     ),
                     icon: const Icon(Icons.block),
                     label: const Text(
-                      'Ø±ÙØ¶',
+                      'رفض',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -495,7 +501,7 @@ class _InstallmentRequestDetailsPageState
                     ),
                     icon: const Icon(Icons.check_circle),
                     label: const Text(
-                      'Ù…ÙˆØ§ÙÙ‚Ø©',
+                      'موافقة',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -613,3 +619,4 @@ class _InstallmentRequestDetailsPageState
     }
   }
 }
+

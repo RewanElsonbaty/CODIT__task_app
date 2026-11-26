@@ -1,5 +1,4 @@
 import 'package:codit/features/auth/presentation/auth_cubit.dart';
-import 'package:codit/features/auth/domain/models/auth_models.dart';
 import 'package:codit/features/auth/presentation/screens/login_screen.dart';
 import 'package:codit/features/auth/presentation/screens/otp_screen.dart';
 import 'package:codit/features/auth/presentation/screens/device_verification_screen.dart';
@@ -9,18 +8,17 @@ import 'package:codit/features/approvals/presentation/approvals_page.dart';
 import 'package:codit/features/approvals/presentation/approval_details_screen.dart';
 import 'package:codit/features/approvals/presentation/installment_requests_page.dart';
 import 'package:codit/features/approvals/presentation/create_installment_request_page.dart';
-import 'package:codit/features/approvals/presentation/installment_request_details_page.dart';
 import 'package:codit/features/installments/presentation/installments_simple_page.dart';
 import 'package:codit/features/branches/presentation/branches_simple_page.dart';
+import 'package:codit/features/branches/presentation/branch_details_page.dart';
+import 'package:codit/features/branches/presentation/branch_installments_page.dart';
 import 'package:codit/features/admin/presentation/admin_dashboard_page.dart';
 import 'package:codit/features/admin/presentation/staff_reports_page.dart';
 import 'package:codit/features/manager/presentation/manager_dashboard_page.dart';
 import 'package:codit/features/home/presentation/home_page.dart';
 import 'package:codit/core/widgets/font_test_widget.dart';
-import 'package:codit/core/theme/app_colors.dart';
 import 'package:codit/mocks/scenario_panel_page.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 /// Router - opens directly to login
@@ -213,6 +211,52 @@ GoRouter buildRouter(AuthCubit authCubit) {
           return '/home'; // Redirect to home if no permission
         },
         builder: (_, __) => const BranchesSimplePage(),
+      ),
+      // Branch Details
+      GoRoute(
+        path: '/branch-details/:branchId',
+        redirect: (context, state) {
+          final authState = authCubit.state;
+          if (authState is AuthAuthenticated) {
+            final permissions = authState.user.permissions;
+            if (permissions.contains('all') || 
+                permissions.contains('branches') || 
+                permissions.contains('monitoring')) {
+              return null;
+            }
+          }
+          return '/home';
+        },
+        builder: (context, state) {
+          final branchId = state.pathParameters['branchId']!;
+          return BranchDetailsPage(branchId: branchId);
+        },
+      ),
+      // Branch Installments
+      GoRoute(
+        path: '/branch-installments/:branchId',
+        redirect: (context, state) {
+          final authState = authCubit.state;
+          if (authState is AuthAuthenticated) {
+            final permissions = authState.user.permissions;
+            if (permissions.contains('all') || 
+                permissions.contains('branches') ||
+                permissions.contains('installments') ||
+                permissions.contains('monitoring')) {
+              return null;
+            }
+          }
+          return '/home';
+        },
+        builder: (context, state) {
+          final branchId = state.pathParameters['branchId']!;
+          final extra = state.extra as Map<String, dynamic>?;
+          final branchName = extra?['branchName'] as String?;
+          return BranchInstallmentsPage(
+            branchId: branchId,
+            branchName: branchName,
+          );
+        },
       ),
 
       // Admin Routes (للمالك فقط)

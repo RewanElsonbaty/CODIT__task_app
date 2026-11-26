@@ -6,21 +6,7 @@ import 'package:codit/core/errors/exceptions.dart';
 class ExceptionHandler {
   /// عرض رسالة خطأ للمستخدم
   static void showErrorDialog(BuildContext context, dynamic error) {
-    String message = 'حدث خطأ غير متوقع';
-    
-    if (error is ServerException) {
-      message = error.message;
-    } else if (error is NetworkException) {
-      message = 'خطأ في الاتصال بالشبكة';
-    } else if (error is ValidationException) {
-      message = error.message;
-    } else if (error is ConflictException) {
-      message = error.message;
-    } else if (error is CacheException) {
-      message = 'خطأ في تحميل البيانات المحفوظة';
-    } else if (error is Exception) {
-      message = error.toString().replaceAll('Exception: ', '');
-    }
+    final message = getErrorMessage(error);
 
     showDialog(
       context: context,
@@ -70,17 +56,7 @@ class ExceptionHandler {
 
   /// عرض Snackbar للأخطاء البسيطة
   static void showErrorSnackBar(BuildContext context, dynamic error) {
-    String message = 'حدث خطأ';
-    
-    if (error is ServerException) {
-      message = error.message;
-    } else if (error is NetworkException) {
-      message = 'خطأ في الاتصال بالشبكة';
-    } else if (error is ValidationException) {
-      message = error.message;
-    } else if (error is Exception) {
-      message = error.toString().replaceAll('Exception: ', '');
-    }
+    final message = getErrorMessage(error);
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -117,16 +93,110 @@ class ExceptionHandler {
       return error.message;
     } else if (error is NetworkException) {
       return error.message;
+    } else if (error is MockNetworkException) {
+      return error.message;
     } else if (error is ValidationException) {
       return error.message;
     } else if (error is ConflictException) {
       return error.message;
+    } else if (error is VersionConflictException) {
+      return error.message;
     } else if (error is CacheException) {
       return error.message;
+    } else if (error is AuthException) {
+      return error.message;
+    } else if (error is UnauthorizedException) {
+      return error.message;
+    } else if (error is NotFoundException) {
+      return error.message;
+    } else if (error is TimeoutException) {
+      return error.message;
     } else if (error is Exception) {
-      return error.toString().replaceAll('Exception: ', '');
+      return error.toString()
+          .replaceAll('Exception: ', '')
+          .replaceAll('exception: ', '');
+    } else if (error is String) {
+      return error;
     }
     return 'حدث خطأ غير متوقع';
+  }
+
+  /// عرض Success Snackbar
+  static void showSuccessSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.check_circle, color: Colors.white),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                message,
+                style: const TextStyle(fontSize: 14),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.green.shade700,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
+  /// عرض Warning Snackbar
+  static void showWarningSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.warning, color: Colors.white),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                message,
+                style: const TextStyle(fontSize: 14),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.orange.shade700,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
+  /// عرض Info Snackbar
+  static void showInfoSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.info, color: Colors.white),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                message,
+                style: const TextStyle(fontSize: 14),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.blue.shade700,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        duration: const Duration(seconds: 3),
+      ),
+    );
   }
 
   /// Log Exception (للتطوير فقط)
@@ -137,5 +207,33 @@ class ExceptionHandler {
       debugPrint('StackTrace: $stackTrace');
     }
     debugPrint('═══════════════════════════════════');
+  }
+
+  /// معالجة Exception بشكل شامل
+  static Future<T?> handleException<T>({
+    required Future<T> Function() operation,
+    BuildContext? context,
+    String? errorMessage,
+    bool showSnackBar = false,
+    bool showDialog = false,
+    T? defaultValue,
+  }) async {
+    try {
+      return await operation();
+    } catch (e, stackTrace) {
+      logException(e, stackTrace);
+      
+      if (context != null && context.mounted) {
+        final message = errorMessage ?? getErrorMessage(e);
+        
+        if (showDialog) {
+          showErrorDialog(context, message);
+        } else if (showSnackBar) {
+          showErrorSnackBar(context, message);
+        }
+      }
+      
+      return defaultValue;
+    }
   }
 }

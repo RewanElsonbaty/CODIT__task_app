@@ -1,5 +1,6 @@
 import 'dart:math';
 import '../../../core/data/mock_api_client.dart';
+import '../../../core/errors/exceptions.dart';
 
 /// Mock Branches API
 /// يحاكي عمليات مراقبة الفروع والمبيعات والموظفين
@@ -97,8 +98,131 @@ class MockBranchesApi {
 
   /// الحصول على كل الفروع
   Future<List<Map<String, dynamic>>> getBranches() async {
-    await _client.get('/branches');
-    return _branches;
+    try {
+      await _client.get('/branches');
+      
+      if (_branches.isEmpty) {
+        throw NotFoundException('لا توجد فروع مسجلة في النظام');
+      }
+
+      return _branches;
+    } on NotFoundException {
+      rethrow;
+    } catch (e) {
+      throw MockNetworkException('فشل في تحميل بيانات الفروع: ${e.toString()}');
+    }
+  }
+
+  /// الحصول على تفاصيل فرع معين
+  Future<Map<String, dynamic>> getBranchDetails(String branchId) async {
+    try {
+      await _client.get('/branches/$branchId');
+
+      // التحقق من البيانات
+      if (branchId.isEmpty) {
+        throw ValidationException('معرف الفرع مطلوب');
+      }
+
+      final branch = _branches.firstWhere(
+        (b) => b['id'] == branchId,
+        orElse: () => throw NotFoundException('الفرع غير موجود'),
+      );
+
+      return {
+        'success': true,
+        'data': {
+          ...branch,
+          'email': '${branchId.toLowerCase()}@codit.gold',
+          'manager_id': 'MGR-${branchId.split('-').last}',
+          'manager_name': branch['manager'],
+        },
+      };
+    } on ValidationException {
+      rethrow;
+    } on NotFoundException {
+      rethrow;
+    } catch (e) {
+      throw MockNetworkException('فشل في تحميل تفاصيل الفرع: ${e.toString()}');
+    }
+  }
+
+  /// الحصول على موظفي الفرع
+  Future<Map<String, dynamic>> getBranchEmployees(String branchId) async {
+    await _client.get('/branches/$branchId/employees');
+
+    // Mock employees data
+    final employees = <Map<String, dynamic>>[
+      {
+        'id': 'EMP-001',
+        'name': 'أحمد محمود',
+        'role': 'مدير الفرع',
+        'phone': '01012345678',
+        'email': 'ahmed@codit.gold',
+        'status': 'active',
+      },
+      {
+        'id': 'EMP-002',
+        'name': 'فاطمة حسن',
+        'role': 'كاشير',
+        'phone': '01123456789',
+        'email': 'fatma@codit.gold',
+        'status': 'active',
+      },
+      {
+        'id': 'EMP-003',
+        'name': 'محمد علي',
+        'role': 'موظف مبيعات',
+        'phone': '01234567890',
+        'email': 'mohamed@codit.gold',
+        'status': 'active',
+      },
+      {
+        'id': 'EMP-004',
+        'name': 'سارة أحمد',
+        'role': 'محاسب',
+        'phone': '01098765432',
+        'email': 'sara@codit.gold',
+        'status': 'active',
+      },
+      {
+        'id': 'EMP-005',
+        'name': 'خالد حسين',
+        'role': 'موظف مبيعات',
+        'phone': '01156789012',
+        'email': 'khaled@codit.gold',
+        'status': 'active',
+      },
+    ];
+
+    return {
+      'success': true,
+      'data': employees,
+    };
+  }
+
+  /// الحصول على إحصائيات الفرع
+  Future<Map<String, dynamic>> getBranchStatistics(String branchId) async {
+    await _client.get('/branches/$branchId/statistics');
+
+    final branch = _branches.firstWhere(
+      (b) => b['id'] == branchId,
+      orElse: () => throw MockNetworkException('الفرع غير موجود'),
+    );
+
+    // Mock statistics
+    return {
+      'success': true,
+      'data': {
+        'employees_count': branch['total_employees'] ?? 0,
+        'active_employees': branch['active_employees'] ?? 0,
+        'today_sales': branch['today_sales'] ?? 0.0,
+        'today_transactions': branch['today_transactions'] ?? 0,
+        'total_sales': (branch['today_sales'] as double? ?? 0.0) * 30, // Mock monthly
+        'active_installments': _random.nextInt(50) + 10,
+        'overdue_installments': _random.nextInt(10),
+        'completed_installments': _random.nextInt(100) + 50,
+      },
+    };
   }
 
   /// الحصول على فرع معين

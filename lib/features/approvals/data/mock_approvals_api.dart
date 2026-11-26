@@ -1,5 +1,6 @@
 import 'dart:math';
 import '../../../core/data/mock_api_client.dart';
+import '../../../core/errors/exceptions.dart';
 
 /// Mock Approvals API
 /// يحاكي عمليات الموافقات والطلبات والمراجعات

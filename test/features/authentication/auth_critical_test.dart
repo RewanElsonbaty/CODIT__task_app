@@ -3,6 +3,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:codit/features/authentication/data/mock_auth_api.dart';
 import 'package:codit/core/data/mock_api_client.dart';
+import 'package:codit/core/errors/exceptions.dart';
 
 /// Critical Tests للـ Authentication
 /// تشمل: Token Refresh, Session Expiry, Concurrent Sessions

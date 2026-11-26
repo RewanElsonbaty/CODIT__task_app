@@ -99,9 +99,9 @@ class _BranchesPageContent extends StatelessWidget {
                     child: ListView.builder(
                       padding: const EdgeInsets.all(16),
                       itemCount: state.branches.length,
-                      itemBuilder: (context, index) {
+                      itemBuilder: (ctx, index) {
                         final branch = state.branches[index];
-                        return _buildBranchCard(branch);
+                        return _buildBranchCard(ctx, branch);
                       },
                     ),
                   ),
@@ -237,29 +237,37 @@ class _BranchesPageContent extends StatelessWidget {
     );
   }
 
-  Widget _buildBranchCard(Map<String, dynamic> branch) {
+  Widget _buildBranchCard(BuildContext context, Map<String, dynamic> branch) {
     final isOpen = branch['status'] == 'نشط';
     final statusColor = isOpen ? Colors.green : Colors.red;
     final employeePercentage = (branch['active_employees'] as int) / 
                                (branch['total_employees'] as int);
 
-    return Card(
-      color: AppColors.card,
-      margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: isOpen
-              ? Colors.green.withOpacity(0.3)
-              : Colors.grey[800]!,
-          width: 1.5,
+    return InkWell(
+      onTap: () {
+        // الانتقال لصفحة تفاصيل الفرع
+        context.push('/branch-details/${branch['id']}', extra: {
+          'branchName': branch['name'],
+        });
+      },
+      borderRadius: BorderRadius.circular(12),
+      child: Card(
+        color: AppColors.card,
+        margin: const EdgeInsets.only(bottom: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(
+            color: isOpen
+                ? Colors.green.withOpacity(0.3)
+                : Colors.grey[800]!,
+            width: 1.5,
+          ),
         ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
             // الهيدر
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -494,7 +502,7 @@ class _BranchesPageContent extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ));
   }
 
   Widget _buildStatBox(

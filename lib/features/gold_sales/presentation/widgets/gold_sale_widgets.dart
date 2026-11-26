@@ -3,10 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/utils/responsive_utils.dart';
 import '../../domain/gold_models.dart';
 import '../gold_sale_cubit.dart';
-import 'add_gold_item_dialog.dart';
 import 'progressive_add_gold_dialog.dart';
 
 /// الهيدر - رقم الفاتورة والتاريخ

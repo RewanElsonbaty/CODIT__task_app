@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import '../errors/exceptions.dart';
 
 /// Mock API Client - محاكاة الاتصال بالخادم
 /// يستخدم في Development mode فقط
@@ -98,13 +99,4 @@ class MockApiClient {
 
     return {'success': true, 'timestamp': DateTime.now().toIso8601String()};
   }
-}
-
-/// استثناء خاص بأخطاء الشبكة في الـ Mock
-class MockNetworkException implements Exception {
-  final String message;
-  MockNetworkException(this.message);
-
-  @override
-  String toString() => 'MockNetworkException: $message';
 }

@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:codit/features/approvals/data/mock_approvals_api.dart';
 import 'package:codit/core/data/mock_api_client.dart';
+import 'package:codit/core/errors/exceptions.dart';
 
 /// Critical Tests للـ Approvals
 /// تشمل: Conflict Resolution, Version Tracking, Concurrent Updates

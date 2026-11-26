@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:codit/features/installments/data/mock_installments_api.dart';
 import 'package:codit/core/data/mock_api_client.dart';
+import 'package:codit/core/errors/exceptions.dart';
 
 /// Critical Tests للـ Installments
 /// تشمل: FIFO Payment Allocation, Overdue Detection, Late Fees

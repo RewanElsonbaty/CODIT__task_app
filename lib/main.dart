@@ -88,9 +88,11 @@ class _CoditAppState extends State<CoditApp> {
         title: 'CODIT',
         theme: LuxuryTheme.darkTheme,
         locale: const Locale('ar'),
-        supportedLocales: const [Locale('ar')],
+        supportedLocales: const [
+          Locale('ar', ''),
+          Locale('en', ''),
+        ],
         localizationsDelegates: const [
-          AppLocalizations.delegate,
           GlobalMaterialLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
