@@ -23,7 +23,7 @@ class LanguageSwitcher extends StatelessWidget {
           return ListTile(
             leading: Icon(
               Icons.language,
-              color: AppColors.gold,
+              color: AppColors.primary,
             ),
             title: Text(
               isArabic ? 'اللغة' : 'Language',
@@ -41,7 +41,7 @@ class LanguageSwitcher extends StatelessWidget {
             ),
             trailing: Switch(
               value: !isArabic,
-              activeColor: AppColors.gold,
+              activeColor: AppColors.primary,
               onChanged: (_) => localeCubit.toggleLocale(),
             ),
             onTap: () => localeCubit.toggleLocale(),
@@ -51,7 +51,7 @@ class LanguageSwitcher extends StatelessWidget {
           return IconButton(
             icon: Icon(
               Icons.language,
-              color: AppColors.gold,
+              color: AppColors.primary,
             ),
             onPressed: () => localeCubit.toggleLocale(),
             tooltip: isArabic ? 'Switch to English' : 'التبديل للعربية',
@@ -82,10 +82,10 @@ class LanguageChip extends StatelessWidget {
               vertical: 6,
             ),
             decoration: BoxDecoration(
-              color: AppColors.gold.withOpacity(0.2),
+              color: AppColors.primary.withOpacity(0.2),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: AppColors.gold,
+                color: AppColors.primary,
                 width: 1,
               ),
             ),
@@ -94,14 +94,14 @@ class LanguageChip extends StatelessWidget {
               children: [
                 Icon(
                   Icons.language,
-                  color: AppColors.gold,
+                  color: AppColors.primary,
                   size: 18,
                 ),
                 const SizedBox(width: 6),
                 Text(
                   isArabic ? 'EN' : 'ع',
                   style: TextStyle(
-                    color: AppColors.gold,
+                    color: AppColors.primary,
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
                   ),
