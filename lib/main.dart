@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:codit/core/deep_linking/deep_link_handler.dart';
 import 'package:codit/core/di/injection.dart';
 import 'package:codit/core/localization/app_localizations.dart';
+import 'package:codit/core/localization/locale_cubit.dart';
 import 'package:codit/core/routing/app_router.dart';
 import 'package:codit/core/theme/luxury_theme.dart';
 import 'package:codit/features/auth/presentation/auth_cubit.dart';
@@ -81,27 +82,38 @@ class _CoditAppState extends State<CoditApp> {
   @override
   Widget build(BuildContext context) {
     final authCubit = getIt<AuthCubit>();
-    return BlocProvider.value(
-      value: authCubit,
-      child: MaterialApp.router(
-        debugShowCheckedModeBanner: false,
-        title: 'CODIT',
-        theme: LuxuryTheme.darkTheme,
-        locale: const Locale('ar'),
-        supportedLocales: const [
-          Locale('ar', ''),
-          Locale('en', ''),
-        ],
-        localizationsDelegates: const [
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        routerConfig: _router,
-        builder: (context, child) {
-          return Directionality(
-            textDirection: TextDirection.rtl,
-            child: child ?? const SizedBox.shrink(),
+    
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider.value(value: authCubit),
+        BlocProvider(create: (_) => LocaleCubit()),
+      ],
+      child: BlocBuilder<LocaleCubit, Locale>(
+        builder: (context, locale) {
+          return MaterialApp.router(
+            debugShowCheckedModeBanner: false,
+            title: 'CODIT',
+            theme: LuxuryTheme.darkTheme,
+            locale: locale,
+            supportedLocales: const [
+              Locale('ar', ''),
+              Locale('en', ''),
+            ],
+            localizationsDelegates: const [
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            routerConfig: _router,
+            builder: (context, child) {
+              // ✅ تحديد الاتجاه حسب اللغة
+              final isArabic = locale.languageCode == 'ar';
+              
+              return Directionality(
+                textDirection: isArabic ? TextDirection.rtl : TextDirection.ltr,
+                child: child ?? const SizedBox.shrink(),
+              );
+            },
           );
         },
       ),
